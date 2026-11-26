@@ -133,7 +133,7 @@ const filtre = [{slug: 'alle', navn: 'Alle'}, ...k.filter((kat) => bilder.some((
     const b = s[aapen]
     const ar = Number(b.dataset.ar || 1.5)
     ramme.style.aspectRatio = String(ar)
-    ramme.style.background = b.dataset.tone || '#5d625c'
+    ramme.style.background = b.dataset.tone || '#8d7b6c'
     ramme.dataset.retning = ar >= 1 ? 'liggende' : 'staende'
     img.hidden = !b.dataset.stor
     if (b.dataset.stor) img.src = b.dataset.stor
@@ -250,7 +250,7 @@ const filtre = [{slug: 'alle', navn: 'Alle'}, ...k.filter((kat) => bilder.some((
     margin: 0;
     border: 0;
     padding: 72px 16px 40px;
-    background: rgba(255, 255, 255, 0.97);
+    background: rgba(242, 241, 232, 0.97);
   }
   .lysboks[open] {
     display: flex;
@@ -260,7 +260,7 @@ const filtre = [{slug: 'alle', navn: 'Alle'}, ...k.filter((kat) => bilder.some((
     gap: 24px;
   }
   .lysboks::backdrop {
-    background: rgba(255, 255, 255, 0.97);
+    background: rgba(242, 241, 232, 0.97);
   }
   .lysboks__lukk,
   .lysboks__pil {
@@ -308,10 +308,17 @@ const filtre = [{slug: 'alle', navn: 'Alle'}, ...k.filter((kat) => bilder.some((
   }
   .lysboks__navn {
     font-family: var(--serif);
-    font-size: 22px;
+    font-weight: 300;
+    font-optical-sizing: auto;
+    font-size: 34px;
+    line-height: 1.1;
   }
   .lysboks__pos {
-    font-size: 13px;
+    font-family: var(--sans);
+    font-weight: 300;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
     color: var(--mellomgra);
   }
   .lysboks__lenke {
@@ -332,13 +339,13 @@ const filtre = [{slug: 'alle', navn: 'Alle'}, ...k.filter((kat) => bilder.some((
       display: none;
     }
     .topptekst h1 {
-      font-size: 30px;
+      font-size: 34px;
     }
     .filter {
       position: sticky;
       top: var(--mobil-topp);
       z-index: 5;
-      background: var(--hvit);
+      background: var(--bakgrunn);
       flex-wrap: nowrap;
       justify-content: flex-start;
       overflow-x: auto;

@@ -22,7 +22,7 @@ export function srcset(b: Bilde, bredder: number[], forhold?: number, filnavn?: 
 }
 
 // Faste nøytrale toner som vises når et bilde mangler, slik som i skissene
-const TONER = ['#5d625c', '#6a7062', '#6f6a62', '#4f5551', '#66625e', '#58604f']
+const TONER = ['#8d7b6c', '#927a5c', '#7a6858', '#a08b76', '#6e5d50', '#9a8674']
 export const tone = (i: number) => TONER[((i % TONER.length) + TONER.length) % TONER.length]
 
 export function forholdFra(b: Bilde, reserve = 1.5) {

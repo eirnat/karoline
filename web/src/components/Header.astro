@@ -83,6 +83,8 @@ const MENY = [
   .meny a,
   .mobilmeny a {
     padding: 13px 28px;
+    font-family: var(--sans);
+    font-weight: 300;
     font-size: 13px;
     letter-spacing: 1.5px;
     text-transform: uppercase;
@@ -104,7 +106,7 @@ const MENY = [
       position: sticky;
       top: 0;
       z-index: 20;
-      background: var(--hvit);
+      background: var(--bakgrunn);
     }
     .topp__pc {
       display: none;
@@ -139,7 +141,7 @@ const MENY = [
       position: fixed;
       inset: var(--mobil-topp) 0 0 0;
       padding: 48px 24px;
-      background: var(--hvit);
+      background: var(--bakgrunn);
     }
     .mobilmeny a[aria-current='page'] {
       border-color: var(--svart);

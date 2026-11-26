@@ -20,35 +20,37 @@ const {storrelse = 'stor'} = Astro.props
   }
   .logo__navn {
     font-family: var(--skrift);
+    font-weight: 400;
     font-size: 64px;
     line-height: 1;
-    letter-spacing: 2px;
+    letter-spacing: 0;
   }
   .logo__under {
     display: flex;
     align-items: center;
     gap: 10px;
     font-family: var(--serif);
+    font-weight: 300;
+    font-optical-sizing: auto;
     font-size: 11px;
     letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--under);
     margin-top: -2px;
   }
   .logo__under span {
     width: 90px;
     height: 1px;
-    background: var(--svart);
+    background: var(--under);
   }
   .logo--liten .logo__navn {
     font-size: 30px;
-    letter-spacing: 0;
   }
   .logo--liten .logo__under {
-    font-size: 7px;
-    letter-spacing: 2.5px;
-    gap: 6px;
-    margin-top: 0;
+    gap: 8px;
+    margin-top: 2px;
   }
   .logo--liten .logo__under span {
-    width: 36px;
+    width: 28px;
   }
 </style>

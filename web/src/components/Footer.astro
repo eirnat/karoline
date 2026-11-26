@@ -77,15 +77,17 @@ const google = googleAdresse(i?.googleUrl)
   }
   .bunn__logo {
     font-family: var(--skrift);
+    font-weight: 400;
     font-size: 40px;
     line-height: 1;
+    letter-spacing: 0;
   }
   .bunn__kolonner {
     display: flex;
     flex-wrap: wrap;
     gap: 32px 72px;
-    font-size: 15px;
-    line-height: 1.9;
+    font-size: 17px;
+    line-height: 1.7;
   }
   .bunn__kolonner a {
     text-decoration: none;
@@ -95,6 +97,8 @@ const google = googleAdresse(i?.googleUrl)
   }
   .bunn__liten {
     font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
     color: var(--mellomgra);
   }
   @media (max-width: 720px) {
@@ -108,9 +112,6 @@ const google = googleAdresse(i?.googleUrl)
       flex-direction: column;
       align-items: center;
       gap: 20px;
-    }
-    .bunn__logo {
-      font-size: 34px;
     }
   }
 </style>
