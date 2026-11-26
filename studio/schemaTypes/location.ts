@@ -15,6 +15,21 @@ export const location = defineType({
       validation: (r) => r.required(),
     }),
     defineField({
+      name: 'preposisjon',
+      title: 'Preposisjon',
+      type: 'string',
+      description: '«i Oslo», men «på Sotra».',
+      initialValue: 'i',
+      options: {
+        list: [
+          {title: 'i', value: 'i'},
+          {title: 'på', value: 'på'},
+        ],
+        layout: 'radio',
+        direction: 'horizontal',
+      },
+    }),
+    defineField({
       name: 'region',
       title: 'Region',
       type: 'string',
