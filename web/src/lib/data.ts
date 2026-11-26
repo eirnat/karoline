@@ -27,7 +27,7 @@ export type StoryFull = StoryKort & {
   seo?: {tittel?: string; beskrivelse?: string}
   leverandorer?: {_key: string; rolle?: string; navn?: string; lenke?: string}[]
   sted?: string
-  stedInfo?: {navn: string; region?: string}
+  stedInfo?: {navn: string; region?: string; preposisjon?: 'i' | 'på'}
   kategori: {_id: string; navn: string; slug: string; prisFra?: string}
   bilder?: import('./typer').Bilde[]
   omtale?: Omtale
@@ -64,7 +64,7 @@ export const omtaleForside = () => q<Omtale>(Q.OMTALE_FORSIDE)
 export const sider = () => q<Side[]>(Q.SIDER)
 
 export async function story(slug: string): Promise<StoryFull | null> {
-  const s = await q<(Omit<StoryFull, 'sted'> & {sted?: {navn: string; region?: string}}) | null>(Q.STORY, {slug})
+  const s = await q<(Omit<StoryFull, 'sted'> & {sted?: {navn: string; region?: string; preposisjon?: 'i' | 'på'}}) | null>(Q.STORY, {slug})
   if (!s) return null
   return {...s, sted: s.sted?.navn, stedInfo: s.sted}
 }

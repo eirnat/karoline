@@ -11,6 +11,8 @@ interface Props {
   sizes?: string
   bredder?: number[]
   alt?: string
+  /** Lesbart filnavn i bildeadressen, for eksempel oppdragets adresse */
+  filnavn?: string
   etikett?: string
   i?: number
   lazy?: boolean
@@ -24,6 +26,7 @@ const {
   sizes = '100vw',
   bredder = [480, 800, 1200, 1600, 2200],
   alt,
+  filnavn,
   etikett,
   i = 0,
   lazy = true,
@@ -41,8 +44,8 @@ const bakgrunn = bilde?.lqip ? `background-image:url(${bilde.lqip});background-s
   {
     finnes && (
       <img
-        src={bildeUrl(bilde!, 1200, forhold)}
-        srcset={srcset(bilde!, bredder, forhold)}
+        src={bildeUrl(bilde!, 1200, forhold, filnavn)}
+        srcset={srcset(bilde!, bredder, forhold, filnavn)}
         sizes={sizes}
         alt={tekst}
         loading={lazy ? 'lazy' : 'eager'}

@@ -41,14 +41,11 @@ export function kortTekst(tekst = '', maks = 155) {
   return t.slice(0, maks - 1).replace(/\s+\S*$/, '') + '…'
 }
 
-// Plassholdere i hakeparentes fra skissene skal ikke sendes til Google
+// Plassholdere i hakeparentes fra skissene skal ikke sendes til Google.
+// Hele teksten droppes, så «Fra [PRIS] kr» ikke blir «Fra kr».
 export function utenPlassholder(t?: string) {
-  if (!t) return ''
-  return t
-    .replace(/\s*\[[^[\]]*\]/g, '')
-    .replace(/[ \t]{2,}/g, ' ')
-    .replace(/\s+([.,;:])/g, '$1')
-    .trim()
+  if (!t || t.includes('[')) return ''
+  return t.trim()
 }
 
 export function instagramAdresse(brukernavn?: string) {

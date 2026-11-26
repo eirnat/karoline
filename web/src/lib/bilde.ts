@@ -9,15 +9,16 @@ export function harBilde(b: Bilde | undefined): b is NonNullable<Bilde> & {asset
 }
 
 // Én URL. Med både bredde og høyde beskjæres bildet rundt fokuspunktet Karoline satte.
-export function bildeUrl(b: Bilde, bredde: number, forhold?: number) {
+export function bildeUrl(b: Bilde, bredde: number, forhold?: number, filnavn?: string) {
   if (!harBilde(b)) return ''
   let u = builder.image(b).width(bredde).auto('format').quality(80)
   if (forhold) u = u.height(Math.round(bredde / forhold)).fit('crop')
+  if (filnavn) u = u.vanityName(filnavn)
   return u.url()
 }
 
-export function srcset(b: Bilde, bredder: number[], forhold?: number) {
-  return bredder.map((w) => `${bildeUrl(b, w, forhold)} ${w}w`).join(', ')
+export function srcset(b: Bilde, bredder: number[], forhold?: number, filnavn?: string) {
+  return bredder.map((w) => `${bildeUrl(b, w, forhold, filnavn)} ${w}w`).join(', ')
 }
 
 // Faste nøytrale toner som vises når et bilde mangler, slik som i skissene

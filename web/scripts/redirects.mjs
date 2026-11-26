@@ -28,8 +28,13 @@ if (process.env.DEMO !== '1') {
   }
 }
 
-// Resten av de gamle blogginnleggene sendes til bryllupsoversikten
+// Resten av de gamle blogginnleggene og galleriet sendes til bryllupsoversikten.
+// Kjærestebilder het /tur før lansering.
 linjer.push('/post/*  /bryllup  301')
+linjer.push('/blog  /bryllup  301')
+linjer.push('/blog/*  /bryllup  301')
+linjer.push('/tur  /kjaerestebilder  301')
+linjer.push('/tur/*  /kjaerestebilder/:splat  301')
 
 writeFileSync('dist/_redirects', linjer.join('\n') + '\n')
 console.log(`redirects: skrev ${linjer.length} linjer til dist/_redirects`)

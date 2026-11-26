@@ -1,5 +1,5 @@
 ---
-// Tjenestesider (/bryllup, /familie, /tur, /ansattbilder) og vanlige sider (/om, /kontakt, /priser).
+// Tjenestesider (/bryllup, /familie, /kjaerestebilder, /ansattbilder) og vanlige sider (/om, /kontakt, /priser).
 import {toHTML} from '@portabletext/to-html'
 import Base from '../layouts/Base.astro'
 import Bilde from '../components/Bilde.astro'
@@ -9,7 +9,7 @@ import Kontaktfelt from '../components/Kontaktfelt.astro'
 import Kontaktskjema from '../components/Kontaktskjema.astro'
 import Profiler from '../components/Profiler.astro'
 import {innstillinger, kategorier, sider, stories, faqKategori, type Side} from '../lib/data'
-import {faqSide, tjeneste} from '../lib/schema'
+import {faqSide, kontaktSide, profilSide, tjeneste} from '../lib/schema'
 import {kortTekst, utenPlassholder} from '../lib/tekst'
 import type {Kategori} from '../lib/typer'
 
@@ -41,7 +41,13 @@ const erKontakt = side?.slug === 'kontakt'
 const aktiv = erBryllup ? 'bryllup' : kategori ? 'andre' : side?.slug === 'om' ? 'om' : erKontakt ? 'kontakt' : undefined
 const tittel = kategori ? kategori.navn : side!.tittel
 
-const schema = kategori ? ([tjeneste(kategori, Astro.site!), faqSide(faq)].filter(Boolean) as object[]) : undefined
+const schema = kategori
+  ? ([tjeneste(kategori, Astro.site!), faqSide(faq)].filter(Boolean) as object[])
+  : side?.slug === 'om'
+    ? [profilSide(Astro.site!)]
+    : side?.slug === 'kontakt'
+      ? [kontaktSide(Astro.site!)]
+      : undefined
 ---
 
 <Base

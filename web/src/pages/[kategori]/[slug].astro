@@ -28,8 +28,17 @@ const miniatyr = (x: NonNullable<typeof forrige>) => (harBilde(x.forsidebilde ??
 
 const erBryllup = s.kategori.slug === 'bryllup'
 const typeNavn = typeTekst(s)
+const preposisjon = s.stedInfo?.preposisjon === 'på' ? 'på' : 'i'
+const hvor = s.sted ? `${preposisjon} ${s.sted}` : ''
 const etikett = [typeNavn, s.sted, manedAar(s.dato)].filter(Boolean).join(' · ')
-const undertittel = s.lokale ? `${typeNavn} på ${s.lokale}${s.sted ? ` i ${s.sted}` : ''}` : s.sted ? `${typeNavn} i ${s.sted}` : ''
+const undertittel = s.lokale ? `${typeNavn} på ${s.lokale}${hvor ? ` ${hvor}` : ''}` : hvor ? `${typeNavn} ${hvor}` : ''
+const navnOg = s.navn.replace(/\s*&\s*/g, ' og ')
+const aar = s.dato?.slice(0, 4)
+const bestemtType = typeNavn.toLowerCase().endsWith('bryllup') ? `${typeNavn.toLowerCase()}et` : typeNavn.toLowerCase() === 'vielse' ? 'vielsen' : typeNavn.toLowerCase()
+const reservetekst = erBryllup
+  ? `Bilder fra ${bestemtType} til ${navnOg}${hvor ? ` ${hvor}` : ''}${aar ? ` i ${aar}` : ''}, tatt av bryllupsfotograf Karoline Rage.`
+  : `Bilder fra ${s.kategori.navn.toLowerCase()} med ${navnOg}${hvor ? ` ${hvor}` : ''}${aar ? ` i ${aar}` : ''}, tatt av fotograf Karoline Rage.`
+const altReserve = `Fra ${erBryllup ? 'bryllupet' : s.kategori.navn.toLowerCase()} til ${s.navn}${hvor ? ` ${hvor}` : ''}`
 
 const fakta = [
   ['Sted', s.sted],
@@ -62,10 +71,10 @@ const schema = [
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: `${s.navn}${undertittel ? ` – ${undertittel}` : ''}`,
-    description: kortTekst(fortelling || undertittel),
+    description: kortTekst(fortelling || reservetekst),
     datePublished: s.dato,
     dateModified: s._updatedAt,
-    image: bilder.filter((b) => harBilde(b)).slice(0, 10).map((b) => bildeUrl(b, 1600)),
+    image: bilder.filter((b) => harBilde(b)).slice(0, 10).map((b) => bildeUrl(b, 1600, undefined, s.slug)),
     author: {'@type': 'Person', name: 'Karoline Rage'},
     publisher: {'@id': new URL('/#bedrift', Astro.site).href},
     contentLocation: s.sted ? {'@type': 'Place', name: [s.lokale, s.sted].filter(Boolean).join(', ')} : undefined,
@@ -93,7 +102,7 @@ const delUrl = encodeURIComponent(side)
 <Base
   aktiv={erBryllup ? 'bryllup' : 'andre'}
   tittel={s.seo?.tittel || `${s.navn} – ${undertittel || s.kategori.navn}`}
-  beskrivelse={s.seo?.beskrivelse || kortTekst(fortelling || `${undertittel}. Fotografert av Karoline Rage.`)}
+  beskrivelse={s.seo?.beskrivelse || kortTekst(fortelling || reservetekst)}
   delingsbilde={forsidebilde}
   type="article"
   schema={schema}
@@ -102,7 +111,7 @@ const delUrl = encodeURIComponent(side)
     <a href="/">Hjem</a> / <a href={`/${s.kategori.slug}`}>{s.kategori.navn}</a> / <span>{s.navn}</span>
   </nav>
 
-  <Bilde bilde={forsidebilde} alt={forsidebilde?.alt || s.navn} lazy={false} class="story__mobilhelt" />
+  <Bilde bilde={forsidebilde} alt={forsidebilde?.alt || altReserve} filnavn={s.slug} lazy={false} class="story__mobilhelt" />
 
   <section class="story__tittel">
     {etikett && <p class="etikett">{etikett}</p>}
@@ -132,19 +141,19 @@ const delUrl = encodeURIComponent(side)
       grupper.map((g) =>
         g.type === 'bred' ? (
           <figure>
-            <Bilde bilde={g.bilder[0]} forhold={16 / 9} i={g.start} lazy={g.start > 0} />
+            <Bilde bilde={g.bilder[0]} alt={g.bilder[0].alt || altReserve} filnavn={s.slug} forhold={16 / 9} i={g.start} lazy={g.start > 0} />
             {g.bilder[0].bildetekst && <figcaption>{g.bilder[0].bildetekst}</figcaption>}
           </figure>
         ) : g.type === 'midt' ? (
           <figure class="bilder__midt">
-            <Bilde bilde={g.bilder[0]} forhold={3 / 2} i={g.start} sizes="(max-width: 1040px) 100vw, 960px" />
+            <Bilde bilde={g.bilder[0]} alt={g.bilder[0].alt || altReserve} filnavn={s.slug} forhold={3 / 2} i={g.start} sizes="(max-width: 1040px) 100vw, 960px" />
             {g.bilder[0].bildetekst && <figcaption>{g.bilder[0].bildetekst}</figcaption>}
           </figure>
         ) : (
           <div class:list={['bilder__rad', `bilder__rad--${g.type}`]}>
             {g.bilder.map((b, n) => (
               <figure>
-                <Bilde bilde={b} forhold={0.8} i={g.start + n} sizes={g.type === 'par' ? '(max-width: 720px) 100vw, 50vw' : '(max-width: 720px) 100vw, 33vw'} />
+                <Bilde bilde={b} alt={b.alt || altReserve} filnavn={s.slug} forhold={0.8} i={g.start + n} sizes={g.type === 'par' ? '(max-width: 720px) 100vw, 50vw' : '(max-width: 720px) 100vw, 33vw'} />
                 {b.bildetekst && <figcaption>{b.bildetekst}</figcaption>}
               </figure>
             ))}

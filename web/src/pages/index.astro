@@ -35,8 +35,16 @@ const schema = [bedrift(i, Astro.site!, harBilde(karusell[0]?.bilde) ? bildeUrl(
   <Karusell bilder={karusell} />
 
   <section id="om" class="smal">
-    {i?.etikett && <p class="etikett forside__etikett">{i.etikett}</p>}
-    <h1 class="forside__h1">{i?.overskrift || 'Bilder som tar dere tilbake til dagen'}</h1>
+    {
+      i?.etikett ? (
+        <>
+          <h1 class="etikett forside__etikett">{i.etikett}</h1>
+          <p class="forside__h1">{i?.overskrift || 'Bilder som tar dere tilbake til dagen'}</p>
+        </>
+      ) : (
+        <h1 class="forside__h1">{i?.overskrift || 'Bilder som tar dere tilbake til dagen'}</h1>
+      )
+    }
     <span class="strek strek--tett"></span>
     {i?.omTekst && <p class="ingress forside__om">{i.omTekst}</p>}
     <a href="/kontakt" class="knapp knapp--full-mobil forside__knapp">{i?.knappetekst || 'Sjekk om datoen er ledig'}</a>
@@ -114,8 +122,13 @@ const schema = [bedrift(i, Astro.site!, harBilde(karusell[0]?.bilde) ? bildeUrl(
 <style>
   .forside__etikett {
     margin-bottom: 20px;
+    font-family: var(--sans);
+    font-weight: 300;
   }
   .forside__h1 {
+    font-family: var(--serif);
+    font-weight: 300;
+    line-height: 1.1;
     font-size: clamp(34px, 4.2vw, 56px);
   }
   .forside__om {

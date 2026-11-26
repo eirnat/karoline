@@ -5,7 +5,7 @@ import * as Q from './queries'
 const kat = {
   bryllup: {_id: 'kategori-bryllup', navn: 'Bryllup', slug: 'bryllup'},
   familie: {_id: 'kategori-familie', navn: 'Familie', slug: 'familie'},
-  tur: {_id: 'kategori-tur', navn: 'Kjærestebilder', slug: 'tur'},
+  tur: {_id: 'kategori-tur', navn: 'Kjærestebilder', slug: 'kjaerestebilder'},
   ansatt: {_id: 'kategori-ansatt', navn: 'Ansattbilder', slug: 'ansattbilder'},
 }
 
@@ -88,8 +88,8 @@ const galleri = [
 ]
 
 const faq = [
-  {sporsmal: 'Hva koster bryllupsfotografering?', svar: 'Heldagsbryllup koster 40 000 kr inkl. mva. [Hva som er inkludert: antall timer og hvordan bildene leveres.]'},
-  {sporsmal: 'Hvor fotograferer du?', svar: 'Jeg fotograferer i Rogaland, på Vestlandet og ellers i hele Norge. Jeg har blant annet fotografert bryllup i Oslo, Bremanger, Florø, Hardanger, Gulen, Sotra og Italia. [Hvordan reisekostnader beregnes.]'},
+  {sporsmal: 'Hva koster bryllupsfotografering?', svar: 'Heldagsbryllup koster 40 000 kr inkl. mva.'},
+  {sporsmal: 'Hvor fotograferer du?', svar: 'Jeg fotograferer i Rogaland, på Vestlandet og ellers i hele Norge. Jeg har blant annet fotografert bryllup i Oslo, Bremanger, Florø, Hardanger, Gulen, Sotra og Italia.'},
   {sporsmal: 'Hvor mange bilder får vi?', svar: '[Omtrent hvor mange bilder dere får fra et heldagsbryllup, f.eks. «mellom X og Y».]'},
   {sporsmal: 'Når får vi bildene?', svar: '[Leveringstid, f.eks. antall uker etter bryllupet.]'},
   {sporsmal: 'Hvordan booker vi?', svar: 'Send en forespørsel med dato og sted, så svarer jeg så fort jeg kan. Hører dere ikke fra meg innen en uke, ta gjerne en titt i søppelposten.'},
@@ -143,7 +143,7 @@ export function demoSvar(query: string, params: Record<string, unknown>): unknow
       const g = galleri.find((x) => x.slug === st.slug)
       return {
         ...st,
-        sted: {navn: st.sted},
+        sted: {navn: st.sted, preposisjon: st.sted === 'Sotra' ? 'på' : 'i'},
         kategori: {...k, prisFra: kategorier.find((x) => x._id === k._id)?.prisFra},
         bilder: st.slug === stories[0].slug ? lyraBilder : g?.bilder || [],
         leverandorer: [

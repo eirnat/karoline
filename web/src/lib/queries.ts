@@ -32,7 +32,7 @@ export const STORIES = `*[_type == "story" && defined(slug.current) && defined(k
 
 export const STORY = `*[_type == "story" && slug.current == $slug][0]{
   _id, _updatedAt, navn, "slug": slug.current, dato, lokale, type, fortelling, seo, leverandorer,
-  "sted": sted->{navn, region},
+  "sted": sted->{navn, region, preposisjon},
   "kategori": kategori->{_id, navn, "slug": slug.current, prisFra},
   "forsidebilde": forsidebilde${BILDE},
   "bilder": bilder[]${BILDE},

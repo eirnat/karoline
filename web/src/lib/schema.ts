@@ -19,8 +19,10 @@ export function bedrift(i: Innstillinger, site: URL, bilde?: string) {
         image: bilde,
         email: utenPlassholder(i?.epost) || undefined,
         telephone: utenPlassholder(i?.telefon) || undefined,
-        areaServed: i?.omrader?.map((o) => ({'@type': 'AdministrativeArea', name: o})),
+        areaServed: i?.omrader?.map((o) => ({'@type': o === 'Norge' ? 'Country' : 'AdministrativeArea', name: o})),
         address: i?.poststed ? {'@type': 'PostalAddress', addressLocality: i.poststed, addressCountry: 'NO'} : undefined,
+        priceRange: '40000 NOK',
+        logo: new URL('/favicon.svg', site).href,
         sameAs: samme.length ? samme : undefined,
         hasMap: kart || undefined,
         knowsAbout: ['Bryllupsfotografering', 'Familiefotografering', 'Kjærestebilder', 'Ansattbilder', 'Portrettfotografering'],
@@ -62,6 +64,24 @@ export function faqSide(sporsmal: Faq[]) {
       name: f.sporsmal,
       acceptedAnswer: {'@type': 'Answer', text: f.svar},
     })),
+  }
+}
+
+export function profilSide(site: URL) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ProfilePage',
+    url: new URL('/om', site).href,
+    mainEntity: {'@id': new URL('/#karoline', site).href},
+  }
+}
+
+export function kontaktSide(site: URL) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ContactPage',
+    url: new URL('/kontakt', site).href,
+    mainEntity: {'@id': new URL('/#bedrift', site).href},
   }
 }
 
