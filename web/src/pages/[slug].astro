@@ -1,0 +1,177 @@
+---
+// Tjenestesider (/bryllup, /familie, /tur, /ansattbilder) og vanlige sider (/om, /kontakt, /priser).
+import {toHTML} from '@portabletext/to-html'
+import Base from '../layouts/Base.astro'
+import Bilde from '../components/Bilde.astro'
+import StoryKort from '../components/StoryKort.astro'
+import Faq from '../components/Faq.astro'
+import Kontaktfelt from '../components/Kontaktfelt.astro'
+import Kontaktskjema from '../components/Kontaktskjema.astro'
+import {innstillinger, kategorier, sider, stories, faqKategori, type Side} from '../lib/data'
+import {faqSide, tjeneste} from '../lib/schema'
+import {kortTekst, utenPlassholder} from '../lib/tekst'
+import type {Kategori} from '../lib/typer'
+
+export async function getStaticPaths() {
+  const k = await kategorier()
+  const s = (await sider()).filter((x) => !k.some((y) => y.slug === x.slug))
+  const faste: Side[] = [
+    {tittel: 'Om meg', slug: 'om'},
+    {tittel: 'Kontakt', slug: 'kontakt', ingress: 'Fortell meg litt om dagen deres eller oppdraget, så tar jeg kontakt.'},
+  ].filter((f) => !s.some((x) => x.slug === f.slug))
+  return [
+    ...k.map((kat) => ({params: {slug: kat.slug}, props: {kategori: kat, side: null}})),
+    ...[...s, ...faste].map((side) => ({params: {slug: side.slug}, props: {kategori: null, side}})),
+  ]
+}
+
+const {kategori, side} = Astro.props as {kategori: Kategori | null; side: Side | null}
+const i = await innstillinger()
+const alleKategorier = await kategorier()
+
+const oppdrag = kategori ? (await stories()).filter((s) => s.kategori.slug === kategori.slug) : []
+const faq = kategori ? await faqKategori(kategori._id) : []
+const erBryllup = kategori?.slug === 'bryllup'
+const tekstHtml = (kategori?.tekst || side?.tekst) ? toHTML((kategori?.tekst || side?.tekst) as never) : ''
+const ingress = kategori ? kategori.ingress || [kategori.kortTekst, utenPlassholder(kategori.prisFra)].filter(Boolean).join(' ') : side?.ingress
+const erKontakt = side?.slug === 'kontakt'
+const aktiv = erBryllup ? 'bryllup' : kategori ? 'andre' : side?.slug === 'om' ? 'om' : erKontakt ? 'kontakt' : undefined
+const tittel = kategori ? kategori.navn : side!.tittel
+
+const schema = kategori ? ([tjeneste(kategori, Astro.site!), faqSide(faq)].filter(Boolean) as object[]) : undefined
+---
+
+<Base
+  aktiv={aktiv}
+  tittel={(kategori ?? side)?.seo?.tittel || (kategori ? `${kategori.navn} – fotograf i Rogaland og på Vestlandet` : tittel)}
+  beskrivelse={(kategori ?? side)?.seo?.beskrivelse || kortTekst(ingress || '')}
+  delingsbilde={kategori?.bilde ?? side?.bilde}
+  schema={schema}
+>
+  <section class="topptekst">
+    <h1>{tittel}</h1>
+    <span class="strek strek--tett"></span>
+    {ingress && <p class="ingress">{ingress}</p>}
+  </section>
+
+  {side?.bilde && <Bilde bilde={side.bilde} class="side__bilde" sizes="(max-width: 960px) 100vw, 960px" />}
+
+  {tekstHtml && <div class="brodtekst" set:html={tekstHtml} />}
+
+  {
+    kategori?.pakker && kategori.pakker.length > 0 && (
+      <section class="pakker">
+        {kategori.pakker.map((p) => (
+          <div class="pakke">
+            <h2>{p.navn}</h2>
+            {p.pris && <p class="pakke__pris">{p.pris}</p>}
+            {p.beskrivelse && <p>{p.beskrivelse}</p>}
+          </div>
+        ))}
+      </section>
+    )
+  }
+
+  {
+    oppdrag.length > 0 && (
+      <section class="seksjon">
+        <div class="kortgrid oppdrag">
+          {oppdrag.map((s, n) => (
+            <StoryKort story={s} i={n} etikett="sted" />
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    kategori && oppdrag.length === 0 && (
+      <p class="tomt">Her kommer det snart eksempler. Ta gjerne kontakt i mellomtiden.</p>
+    )
+  }
+
+  {erKontakt && <section class="seksjon kontaktside"><Kontaktskjema kategorier={alleKategorier} /></section>}
+
+  <Faq sporsmal={faq} />
+
+  {!erKontakt && <Kontaktfelt overskrift={erBryllup ? i?.kontaktOverskrift : 'Lyst på bilder?'} tekst={erBryllup ? i?.kontaktTekst : 'Fortell meg litt om hva du ønsker, så tar jeg kontakt.'} />}
+</Base>
+
+<style>
+  .topptekst {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 24px 56px;
+    text-align: center;
+  }
+  .topptekst h1 {
+    font-size: clamp(36px, 4.2vw, 56px);
+  }
+  .topptekst .ingress {
+    margin-top: 28px;
+  }
+  :global(.side__bilde) {
+    max-width: 960px;
+    margin: 0 auto 56px;
+  }
+  .brodtekst {
+    max-width: 720px;
+    margin: 0 auto 96px;
+    padding: 0 24px;
+  }
+  .brodtekst :global(p) {
+    margin: 0 0 1.2em;
+  }
+  .brodtekst :global(h2) {
+    font-size: 28px;
+    margin: 1.6em 0 0.6em;
+  }
+  .pakker {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    gap: 32px;
+    padding: 0 var(--kant) 96px;
+  }
+  .pakke {
+    border-top: 1px solid var(--svart);
+    padding-top: 24px;
+  }
+  .pakke h2 {
+    font-size: 26px;
+  }
+  .pakke__pris {
+    margin: 8px 0 12px;
+    color: var(--mellomgra);
+    letter-spacing: 1px;
+  }
+  .tomt {
+    text-align: center;
+    color: var(--mellomgra);
+    padding: 0 24px 96px;
+  }
+  .kontaktside {
+    padding-top: 0;
+  }
+  @media (max-width: 720px) {
+    .topptekst {
+      padding: 36px 24px 28px;
+    }
+    .topptekst h1 {
+      font-size: 34px;
+    }
+    .topptekst .ingress {
+      margin-top: 18px;
+      font-size: 15px;
+    }
+    .oppdrag {
+      gap: 4px;
+    }
+    .oppdrag :global(.kort) {
+      gap: 16px;
+      padding-bottom: 36px;
+    }
+    .kontaktside {
+      padding: 0 24px 56px;
+    }
+  }
+</style>

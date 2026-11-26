@@ -1,0 +1,38 @@
+---
+import Bilde from './Bilde.astro'
+import type {StoryKort} from '../lib/typer'
+import {storyUrl, typeTekst} from '../lib/tekst'
+
+interface Props {
+  story: StoryKort
+  i?: number
+  /** «type» = «Heldagsbryllup · Oslo», «sted» = «Solstua · Oslo» */
+  etikett?: 'type' | 'sted'
+}
+const {story: s, i = 0, etikett = 'type'} = Astro.props
+const tekst =
+  etikett === 'type' ? [typeTekst(s), s.sted].filter(Boolean).join(' · ') : [s.lokale, s.sted].filter(Boolean).join(' · ')
+const bilde = s.forsidebilde?.asset ? s.forsidebilde : s.forste
+---
+
+<a href={storyUrl(s)} class="kort">
+  <Bilde bilde={bilde} forhold={0.8} i={i} alt={bilde?.alt || `${s.navn}, ${s.sted ?? ''}`} sizes="(max-width: 720px) 100vw, 33vw" bredder={[400, 700, 1000]} />
+  <div class="kort__tekst">
+    {tekst && <p class="etikett etikett--liten">{tekst}</p>}
+    <h3>{s.navn}</h3>
+  </div>
+</a>
+
+<style>
+  .kort__tekst {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  @media (max-width: 720px) {
+    .kort__tekst {
+      gap: 4px;
+      padding: 0 24px;
+    }
+  }
+</style>

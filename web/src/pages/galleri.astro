@@ -1,0 +1,371 @@
+---
+// Galleriet: alle stjernemerkede bilder fra alle oppdrag, med filter og lysboks.
+import Base from '../layouts/Base.astro'
+import Bilde from '../components/Bilde.astro'
+import Kontaktfelt from '../components/Kontaktfelt.astro'
+import {galleri, kategorier} from '../lib/data'
+import {bildeUrl, forholdFra, harBilde, tone} from '../lib/bilde'
+import {storyUrl} from '../lib/tekst'
+
+const data = await galleri()
+const k = await kategorier()
+
+// Fletter bildene fra ulike oppdrag, så galleriet ikke viser ett bryllup om gangen
+const koer = data.map((s) => s.bilder.filter(Boolean).map((b) => ({b: b!, s})))
+const bilder: {b: NonNullable<(typeof koer)[number][number]['b']>; s: (typeof data)[number]}[] = []
+for (let runde = 0; koer.some((q) => q.length > runde); runde++) {
+  for (const q of koer) if (q[runde]) bilder.push(q[runde])
+}
+
+const FORSTE = 24
+const filtre = [{slug: 'alle', navn: 'Alle'}, ...k.filter((kat) => bilder.some((x) => x.s.kategori.slug === kat.slug))]
+---
+
+<Base aktiv="galleri" tittel="Galleri" beskrivelse="Et utvalg favorittbilder fra bryllup, familie, tur og ansattbilder av fotograf Karoline Rage.">
+  <section class="topptekst">
+    <p class="etikett">Portefølje</p>
+    <h1>Galleri</h1>
+    <span class="strek strek--tett"></span>
+    <p class="ingress">Et utvalg favorittbilder fra bryllup, familie, tur og ansattbilder. Trykk på et bilde for å se det større og finne oppdraget det hører til.</p>
+  </section>
+
+  <div role="group" aria-label="Filtrer bilder" class="filter">
+    {filtre.map((f, n) => <button type="button" data-filter={f.slug} aria-pressed={n === 0 ? 'true' : 'false'}>{f.navn}</button>)}
+  </div>
+
+  <section aria-label="Bilder" class="galleri" data-forste={FORSTE}>
+    <div class="galleri__flate">
+      {
+        bilder.map(({b, s}, n) => {
+          const ar = forholdFra(b, 1.5)
+          return (
+            <button
+              type="button"
+              class="galleri__bilde"
+              data-kategori={s.kategori.slug}
+              data-n={n}
+              data-stor={harBilde(b) ? bildeUrl(b, 2000) : ''}
+              data-ar={ar}
+              data-tone={tone(n)}
+              data-alt={b.alt || ''}
+              data-navn={s.sted ? `${s.navn} · ${s.sted}` : s.navn}
+              data-lenke={storyUrl(s)}
+              data-kategorinavn={s.kategori.navn}
+              hidden={n >= FORSTE}
+              style={`flex:${ar} 1 ${Math.round(ar * 320)}px;`}
+              aria-label={`Vis større: ${b.alt || s.navn}`}
+            >
+              <Bilde bilde={b} i={n} alt={b.alt || ''} sizes="(max-width: 720px) 100vw, 40vw" bredder={[400, 800, 1200]} etikett={s.sted ? `${s.navn} · ${s.sted}` : s.navn} />
+            </button>
+          )
+        })
+      }
+      <div aria-hidden="true" class="galleri__fyll"></div>
+    </div>
+    {bilder.length > FORSTE && <div class="galleri__mer"><button type="button" class="knapp knapp--liten knapp--full-mobil" data-mer>Vis flere bilder</button></div>}
+    {bilder.length === 0 && <p class="tomt">Ingen bilder er merket som favoritt ennå.</p>}
+  </section>
+
+  <dialog class="lysboks" aria-label="Bildevisning">
+    <button type="button" class="lysboks__lukk" aria-label="Lukk bildevisning" data-lukk>
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.3"><line x1="1" y1="1" x2="21" y2="21"></line><line x1="21" y1="1" x2="1" y2="21"></line></svg>
+    </button>
+    <div class="lysboks__midt">
+      <button type="button" class="lysboks__pil" aria-label="Forrige bilde" data-forrige>
+        <svg aria-hidden="true" width="18" height="34" viewBox="0 0 18 34" fill="none" stroke="currentColor" stroke-width="1.3"><polyline points="16,2 2,17 16,32"></polyline></svg>
+      </button>
+      <div class="lysboks__ramme"><img alt="" class="lysboks__img" /></div>
+      <button type="button" class="lysboks__pil" aria-label="Neste bilde" data-neste>
+        <svg aria-hidden="true" width="18" height="34" viewBox="0 0 18 34" fill="none" stroke="currentColor" stroke-width="1.3"><polyline points="2,2 16,17 2,32"></polyline></svg>
+      </button>
+    </div>
+    <div class="lysboks__info">
+      <p class="lysboks__navn"></p>
+      <p class="lysboks__pos"></p>
+      <a class="lysboks__lenke" href="/">Se hele oppdraget →</a>
+    </div>
+  </dialog>
+
+  <Kontaktfelt gra overskrift="Liker du det du ser?" tekst="Fortell meg litt om dagen deres eller oppdraget, så tar jeg kontakt." />
+</Base>
+
+<script>
+  const flate = document.querySelector<HTMLElement>('.galleri')!
+  const forste = Number(flate.dataset.forste || 24)
+  const alle = [...document.querySelectorAll<HTMLButtonElement>('.galleri__bilde')]
+  const filterKnapper = [...document.querySelectorAll<HTMLButtonElement>('[data-filter]')]
+  const merKnapp = document.querySelector<HTMLButtonElement>('[data-mer]')
+  let filter = 'alle'
+  let vis = forste
+
+  const synlige = () => alle.filter((b) => filter === 'alle' || b.dataset.kategori === filter)
+  function tegn() {
+    const s = synlige()
+    alle.forEach((b) => (b.hidden = true))
+    s.forEach((b, n) => (b.hidden = n >= vis))
+    if (merKnapp) merKnapp.parentElement!.hidden = s.length <= vis
+  }
+  filterKnapper.forEach((k) =>
+    k.addEventListener('click', () => {
+      filter = k.dataset.filter!
+      vis = forste
+      filterKnapper.forEach((x) => x.setAttribute('aria-pressed', String(x === k)))
+      tegn()
+    }),
+  )
+  merKnapp?.addEventListener('click', () => {
+    vis += forste
+    tegn()
+  })
+
+  // Lysboks
+  const boks = document.querySelector<HTMLDialogElement>('.lysboks')!
+  const img = boks.querySelector<HTMLImageElement>('.lysboks__img')!
+  const ramme = boks.querySelector<HTMLElement>('.lysboks__ramme')!
+  const navn = boks.querySelector<HTMLElement>('.lysboks__navn')!
+  const pos = boks.querySelector<HTMLElement>('.lysboks__pos')!
+  const lenke = boks.querySelector<HTMLAnchorElement>('.lysboks__lenke')!
+  let aapen = 0
+
+  function visBilde(n: number) {
+    const s = synlige()
+    aapen = (n + s.length) % s.length
+    const b = s[aapen]
+    const ar = Number(b.dataset.ar || 1.5)
+    ramme.style.aspectRatio = String(ar)
+    ramme.style.background = b.dataset.tone || '#5d625c'
+    ramme.dataset.retning = ar >= 1 ? 'liggende' : 'staende'
+    img.hidden = !b.dataset.stor
+    if (b.dataset.stor) img.src = b.dataset.stor
+    img.alt = b.dataset.alt || ''
+    navn.textContent = b.dataset.navn || ''
+    pos.textContent = `${aapen + 1} av ${s.length}`
+    lenke.href = b.dataset.lenke || '/'
+    lenke.textContent = b.dataset.kategori === 'bryllup' ? 'Se hele bryllupet →' : `Se mer fra ${b.dataset.kategorinavn?.toLowerCase()} →`
+  }
+  alle.forEach((b) =>
+    b.addEventListener('click', () => {
+      visBilde(synlige().indexOf(b))
+      boks.showModal()
+    }),
+  )
+  boks.querySelector('[data-lukk]')!.addEventListener('click', () => boks.close())
+  boks.querySelector('[data-forrige]')!.addEventListener('click', () => visBilde(aapen - 1))
+  boks.querySelector('[data-neste]')!.addEventListener('click', () => visBilde(aapen + 1))
+  boks.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') visBilde(aapen - 1)
+    if (e.key === 'ArrowRight') visBilde(aapen + 1)
+  })
+  boks.addEventListener('click', (e) => e.target === boks && boks.close())
+</script>
+
+<style>
+  .topptekst {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 24px 40px;
+    text-align: center;
+  }
+  .topptekst .etikett {
+    margin-bottom: 20px;
+  }
+  .topptekst h1 {
+    font-size: clamp(36px, 4.2vw, 56px);
+  }
+  .topptekst .ingress {
+    margin-top: 28px;
+  }
+  .filter {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px clamp(4px, 2vw, 24px);
+    padding: 0 16px 48px;
+  }
+  .filter button {
+    min-height: 44px;
+    padding: 11px 24px;
+    background: transparent;
+    cursor: pointer;
+    font-family: var(--sans);
+    font-weight: 300;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--svart);
+    border: 2px solid transparent;
+  }
+  .filter button[aria-pressed='true'] {
+    border-color: var(--svart);
+  }
+  .galleri {
+    padding: 0 var(--kant);
+  }
+  .galleri__flate {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .galleri__bilde {
+    display: block;
+    border: 0;
+    padding: 0;
+    background: none;
+    cursor: zoom-in;
+    text-align: left;
+  }
+  .galleri__bilde[hidden] {
+    display: none;
+  }
+  .galleri__bilde :global(.bilde) {
+    width: 100%;
+  }
+  .galleri__bilde :global(.bilde__etikett) {
+    left: 14px;
+    bottom: 12px;
+    font-family: var(--sans);
+    font-weight: 300;
+  }
+  .galleri__fyll {
+    flex: 999 1 0px;
+    height: 0;
+  }
+  .galleri__mer {
+    text-align: center;
+    padding-top: 56px;
+  }
+  .tomt {
+    text-align: center;
+    color: var(--mellomgra);
+  }
+  :global(.kontaktfelt) {
+    margin-top: 120px;
+  }
+
+  .lysboks {
+    width: 100vw;
+    max-width: none;
+    height: 100vh;
+    max-height: none;
+    margin: 0;
+    border: 0;
+    padding: 72px 16px 40px;
+    background: rgba(255, 255, 255, 0.97);
+  }
+  .lysboks[open] {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+  }
+  .lysboks::backdrop {
+    background: rgba(255, 255, 255, 0.97);
+  }
+  .lysboks__lukk,
+  .lysboks__pil {
+    width: 48px;
+    height: 48px;
+    background: transparent;
+    border: 0;
+    color: var(--svart);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 48px;
+  }
+  .lysboks__lukk {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+  }
+  .lysboks__midt {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(4px, 2vw, 32px);
+    width: 100%;
+    min-height: 0;
+  }
+  .lysboks__ramme[data-retning='liggende'] {
+    width: min(1000px, calc(100% - 112px));
+  }
+  .lysboks__ramme[data-retning='staende'] {
+    height: min(760px, 70vh);
+  }
+  .lysboks__img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .lysboks__info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+  }
+  .lysboks__navn {
+    font-family: var(--serif);
+    font-size: 22px;
+  }
+  .lysboks__pos {
+    font-size: 13px;
+    color: var(--mellomgra);
+  }
+  .lysboks__lenke {
+    margin-top: 6px;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  @media (max-width: 720px) {
+    .topptekst {
+      padding: 24px 24px 20px;
+    }
+    .topptekst .etikett,
+    .topptekst .strek,
+    .topptekst .ingress {
+      display: none;
+    }
+    .topptekst h1 {
+      font-size: 30px;
+    }
+    .filter {
+      position: sticky;
+      top: var(--mobil-topp);
+      z-index: 5;
+      background: var(--hvit);
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      overflow-x: auto;
+      gap: 2px;
+      padding: 0 12px 8px;
+      border-bottom: 1px solid var(--lysgra);
+      margin-bottom: 4px;
+    }
+    .filter button {
+      flex: 0 0 auto;
+      padding: 10px 14px;
+      font-size: 12px;
+    }
+    .galleri {
+      padding: 0;
+    }
+    .galleri__flate {
+      gap: 4px;
+    }
+    .galleri__bilde {
+      flex-basis: 100% !important;
+    }
+    .galleri__mer {
+      padding: 24px 24px 0;
+    }
+    :global(.kontaktfelt) {
+      margin-top: 56px;
+    }
+  }
+</style>

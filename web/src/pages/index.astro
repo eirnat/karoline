@@ -1,0 +1,317 @@
+---
+import Base from '../layouts/Base.astro'
+import Karusell from '../components/Karusell.astro'
+import Bilde from '../components/Bilde.astro'
+import StoryKort from '../components/StoryKort.astro'
+import Faq from '../components/Faq.astro'
+import Kontaktfelt from '../components/Kontaktfelt.astro'
+import {innstillinger, kategorier, stories, faqForside, omtaleForside} from '../lib/data'
+import {bedrift, faqSide} from '../lib/schema'
+import {bildeUrl, harBilde} from '../lib/bilde'
+
+const i = await innstillinger()
+const alleKategorier = await kategorier()
+const alle = await stories()
+const faq = await faqForside()
+const omtale = await omtaleForside()
+
+// Karusellen: forsidebilder Karoline har valgt, ellers de nyeste
+const valgte = alle.filter((s) => s.iKarusell && harBilde(s.forsidebilde ?? null))
+const karusell = (valgte.length ? valgte : alle.slice(0, 8)).slice(0, 8).map((s) => {
+  const b = harBilde(s.forsidebilde ?? null) ? s.forsidebilde : s.forste
+  return {bilde: b ?? null, alt: b?.alt || `${s.navn} – ${s.sted ?? ''}`}
+})
+
+const bryllup = alleKategorier.find((k) => k.slug === 'bryllup')
+const andre = alleKategorier.filter((k) => k.slug !== 'bryllup')
+const sisteBryllup = alle.filter((s) => s.kategori.slug === 'bryllup').slice(0, 3)
+const kategoriBilde = (k: (typeof alleKategorier)[number]) => (harBilde(k.bilde ?? null) ? k.bilde : k.reservebilde)
+
+const schema = [bedrift(i, Astro.site!, harBilde(karusell[0]?.bilde) ? bildeUrl(karusell[0].bilde, 1200) : undefined), faqSide(faq)].filter(Boolean) as object[]
+---
+
+<Base aktiv="hjem" schema={schema}>
+  <Karusell bilder={karusell} />
+
+  <section id="om" class="smal">
+    {i?.etikett && <p class="etikett forside__etikett">{i.etikett}</p>}
+    <h1 class="forside__h1">{i?.overskrift || 'Bilder som tar dere tilbake til dagen'}</h1>
+    <span class="strek strek--tett"></span>
+    {i?.omTekst && <p class="ingress forside__om">{i.omTekst}</p>}
+    <a href="/kontakt" class="knapp knapp--full-mobil forside__knapp">{i?.knappetekst || 'Sjekk om datoen er ledig'}</a>
+  </section>
+
+  <section id="tjenester" class="seksjon">
+    <h2 class="h-seksjon">Hva jeg fotograferer</h2>
+    <span class="strek"></span>
+    <div class="tjenester">
+      {
+        bryllup && (
+          <a href="/bryllup" class="tjeneste-stor">
+            <Bilde bilde={kategoriBilde(bryllup)} forhold={16 / 11} i={2} alt={kategoriBilde(bryllup)?.alt || 'Bryllup'} sizes="(max-width: 720px) 100vw, 60vw" class="tjeneste-stor__bilde" />
+            <div class="tjeneste-stor__topp">
+              <h3>{bryllup.navn}</h3>
+              {bryllup.prisFra && <p class="tjeneste__pris">{bryllup.prisFra}</p>}
+            </div>
+            {bryllup.kortTekst && <p class="tjeneste-stor__tekst">{bryllup.kortTekst}</p>}
+            <span class="tjeneste-stor__lenke">Se bryllup →</span>
+          </a>
+        )
+      }
+      <div class="tjenester__sma">
+        {
+          andre.map((k, n) => (
+            <a href={`/${k.slug}`} class="tjeneste-liten">
+              <Bilde bilde={kategoriBilde(k)} forhold={1} i={n + 3} alt={kategoriBilde(k)?.alt || k.navn} sizes="(max-width: 720px) 100vw, 15vw" bredder={[300, 600, 900]} class="tjeneste-liten__bilde" />
+              <div class="tjeneste-liten__tekst">
+                <h3>{k.navn}</h3>
+                {k.kortTekst && <p class="tjeneste-liten__kort">{k.kortTekst}</p>}
+                {k.prisFra && <p class="tjeneste__pris tjeneste__pris--liten">{k.prisFra}</p>}
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  {
+    sisteBryllup.length > 0 && (
+      <section class="seksjon">
+        <h2 class="h-seksjon">Siste bryllup</h2>
+        <span class="strek" />
+        <div class="kortgrid siste">
+          {sisteBryllup.map((s, n) => (
+            <StoryKort story={s} i={n} />
+          ))}
+        </div>
+        <p class="siste__sveip" aria-hidden="true">Sveip for flere →</p>
+        <div class="siste__knapp">
+          <a href="/bryllup" class="knapp knapp--liten">Se alle bryllup</a>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    omtale && (
+      <section class="omtale">
+        <figure>
+          <blockquote>«{omtale.sitat.replace(/^«|»$/g, '')}»</blockquote>
+          {(omtale.navn || omtale.sted) && <figcaption>{[omtale.navn, omtale.sted].filter(Boolean).join(' · ')}</figcaption>}
+        </figure>
+      </section>
+    )
+  }
+
+  <Faq sporsmal={faq} />
+
+  <Kontaktfelt overskrift={i?.kontaktOverskrift} tekst={i?.kontaktTekst} />
+</Base>
+
+<style>
+  .forside__etikett {
+    margin-bottom: 20px;
+  }
+  .forside__h1 {
+    font-size: clamp(34px, 4.2vw, 56px);
+  }
+  .forside__om {
+    margin-top: 28px;
+  }
+  .forside__knapp {
+    margin-top: 40px;
+  }
+
+  .tjenester {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+  }
+  .tjeneste-stor {
+    flex: 2 1 520px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-decoration: none;
+    color: var(--svart);
+  }
+  .tjeneste-stor__topp {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px 24px;
+  }
+  .tjeneste-stor h3 {
+    font-size: 36px;
+  }
+  .tjeneste__pris {
+    font-size: 15px;
+    letter-spacing: 1px;
+    color: var(--mellomgra);
+  }
+  .tjeneste__pris--liten {
+    font-size: 13px;
+    letter-spacing: 0;
+  }
+  .tjeneste-stor__lenke {
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .tjenester__sma {
+    flex: 1 1 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+  .tjeneste-liten {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    text-decoration: none;
+    color: var(--svart);
+  }
+  .tjeneste-liten :global(.tjeneste-liten__bilde) {
+    flex: 0 0 42%;
+  }
+  .tjeneste-liten__tekst {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .tjeneste-liten h3 {
+    font-size: 24px;
+  }
+  .tjeneste-liten__kort {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .siste__sveip {
+    display: none;
+  }
+  .siste__knapp {
+    text-align: center;
+    margin-top: 56px;
+  }
+
+  .omtale {
+    background: var(--lysgra);
+    padding: 120px 24px;
+  }
+  .omtale figure {
+    margin: 0 auto;
+    max-width: 820px;
+    text-align: center;
+  }
+  .omtale blockquote {
+    margin: 0;
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(24px, 2.6vw, 34px);
+    line-height: 1.4;
+  }
+  .omtale figcaption {
+    margin-top: 28px;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 720px) {
+    .forside__h1 {
+      font-size: 32px;
+      line-height: 1.12;
+    }
+    .forside__etikett {
+      font-size: 11px;
+      letter-spacing: 2.5px;
+      margin-bottom: 16px;
+    }
+    .forside__knapp {
+      margin-top: 32px;
+    }
+    .h-seksjon {
+      font-size: 26px;
+    }
+    .tjenester,
+    .tjenester__sma {
+      gap: 0;
+    }
+    .tjeneste-stor {
+      flex-basis: 100%;
+      gap: 0;
+    }
+    .tjeneste-stor :global(.tjeneste-stor__bilde) {
+      aspect-ratio: 4 / 5 !important;
+    }
+    .tjeneste-stor__topp {
+      padding: 18px 24px 0;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .tjeneste-stor h3 {
+      font-size: 28px;
+    }
+    .tjeneste-stor__tekst,
+    .tjeneste-stor__lenke {
+      display: none;
+    }
+    .tjeneste-stor__topp {
+      padding-bottom: 40px;
+    }
+    .tjeneste__pris {
+      font-size: 14px;
+      letter-spacing: 0;
+    }
+    .tjeneste-liten {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+    }
+    .tjeneste-liten :global(.tjeneste-liten__bilde) {
+      flex-basis: auto;
+    }
+    .tjeneste-liten__tekst {
+      padding: 18px 24px 40px;
+    }
+    .tjeneste-liten__kort {
+      display: none;
+    }
+    .siste {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding: 0 24px;
+      scrollbar-width: none;
+    }
+    .siste > :global(*) {
+      flex: 0 0 min(320px, 82vw);
+      scroll-snap-align: center;
+    }
+    .siste :global(.kort__tekst) {
+      padding: 0;
+    }
+    .siste__sveip {
+      display: block;
+      margin-top: 20px;
+      text-align: center;
+      font-size: 12px;
+      letter-spacing: 1.5px;
+      color: var(--mellomgra);
+    }
+    .siste__knapp {
+      display: none;
+    }
+    .omtale {
+      padding: 64px 24px;
+    }
+    .omtale blockquote {
+      font-size: 22px;
+    }
+  }
+</style>

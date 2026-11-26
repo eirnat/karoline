@@ -1,0 +1,117 @@
+/* Stil A – videreført klassisk. Alle mål er hentet fra skissene i lerretet. */
+
+:root {
+  --svart: #000000;
+  --hvit: #ffffff;
+  --lysgra: #e8e6e6;
+  --mellomgra: #666666;
+  --linjegra: #c7c7c7;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'Lato', system-ui, sans-serif;
+  --skrift: 'Sacramento', cursive;
+  --kant: clamp(16px, 5vw, 80px);
+  --mobil-topp: 56px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--hvit);
+  color: var(--svart);
+  font-family: var(--sans);
+  font-weight: 300;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+img { display: block; max-width: 100%; height: auto; }
+a { color: var(--svart); }
+a:hover { color: #444; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 300; margin: 0; line-height: 1.1; }
+p { margin: 0; }
+:focus-visible { outline: 2px solid var(--svart); outline-offset: 3px; }
+
+.skjult { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* --- Typografi --- */
+.etikett {
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--mellomgra);
+}
+.etikett--liten { letter-spacing: 2px; }
+.h-seksjon { text-align: center; font-size: clamp(28px, 3vw, 40px); }
+.strek { display: block; width: 32px; height: 1px; background: var(--svart); margin: 24px auto 56px; }
+.strek--tett { margin: 28px auto 0; }
+.ingress { font-size: 18px; line-height: 1.7; }
+
+/* --- Knapper --- */
+.knapp {
+  display: inline-block;
+  padding: 16px 36px;
+  border: 2px solid var(--svart);
+  background: transparent;
+  color: var(--svart);
+  font-family: var(--sans);
+  font-weight: 300;
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+}
+.knapp:hover { background: var(--svart); color: var(--hvit); }
+.knapp--liten { padding: 14px 32px; }
+
+/* --- Seksjoner --- */
+.seksjon { padding: 0 var(--kant) 120px; }
+.smal { max-width: 760px; margin: 0 auto; padding: 112px 24px 104px; text-align: center; }
+
+/* --- Bildeplassholder når et bilde mangler --- */
+.bilde { position: relative; overflow: hidden; background: #5d625c; }
+.bilde img { width: 100%; height: 100%; object-fit: cover; }
+.bilde__etikett {
+  position: absolute;
+  left: 20px;
+  bottom: 16px;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--hvit);
+}
+
+/* --- Kortgrid for oppdrag --- */
+.kortgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 32px; }
+.kort { display: flex; flex-direction: column; gap: 14px; text-decoration: none; color: var(--svart); }
+.kort h3 { font-size: 26px; }
+
+/* --- FAQ --- */
+.faq { max-width: 860px; margin: 0 auto; padding: 120px 24px; }
+.faq details { border-top: 1px solid var(--linjegra); padding: 24px 0; }
+.faq details:last-of-type { border-bottom: 1px solid var(--linjegra); }
+.faq summary { cursor: pointer; font-family: var(--serif); font-size: 21px; list-style-position: outside; }
+.faq details p { margin-top: 16px; }
+
+/* --- Kontaktfelt --- */
+.kontaktfelt { border-top: 1px solid var(--lysgra); padding: 112px 24px; text-align: center; }
+.kontaktfelt--gra { background: var(--lysgra); border-top: 0; }
+.kontaktfelt h2 { font-size: clamp(30px, 3.4vw, 46px); }
+.kontaktfelt p { margin: 20px auto 0; max-width: 560px; font-size: 18px; }
+.kontaktfelt .knapp { margin-top: 36px; }
+
+@media (max-width: 720px) {
+  body { font-size: 16px; }
+  .seksjon { padding: 0 0 56px; }
+  .smal { padding: 56px 24px 48px; }
+  .strek { margin: 20px auto 32px; }
+  .faq { padding: 56px 24px; }
+  .faq summary { font-size: 18px; }
+  .kontaktfelt { padding: 56px 24px; }
+  .kontaktfelt h2 { font-size: 28px; }
+  .knapp--full-mobil { display: block; padding: 15px 0; text-align: center; font-size: 12px; }
+  .ingress { font-size: 16px; }
+}
