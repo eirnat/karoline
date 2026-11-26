@@ -53,6 +53,13 @@ export const siteSettings = defineType({
     defineField({name: 'epost', title: 'E-post', type: 'string', group: 'kontakt'}),
     defineField({name: 'telefon', title: 'Telefon', type: 'string', group: 'kontakt'}),
     defineField({name: 'instagram', title: 'Instagram-brukernavn', type: 'string', description: 'Uten @', group: 'kontakt'}),
+    defineField({
+      name: 'googleUrl',
+      title: 'Google-profil',
+      type: 'url',
+      group: 'kontakt',
+      description: 'Lenke til bedriftsprofilen på Google.',
+    }),
     defineField({name: 'orgnr', title: 'Org.nr.', type: 'string', group: 'kontakt'}),
     defineField({name: 'poststed', title: 'Poststed', type: 'string', group: 'kontakt', description: 'Brukes i strukturerte data for Google'}),
     defineField({

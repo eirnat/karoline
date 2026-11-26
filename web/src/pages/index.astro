@@ -5,6 +5,7 @@ import Bilde from '../components/Bilde.astro'
 import StoryKort from '../components/StoryKort.astro'
 import Faq from '../components/Faq.astro'
 import Kontaktfelt from '../components/Kontaktfelt.astro'
+import Profiler from '../components/Profiler.astro'
 import {innstillinger, kategorier, stories, faqForside, omtaleForside} from '../lib/data'
 import {bedrift, faqSide} from '../lib/schema'
 import {bildeUrl, harBilde} from '../lib/bilde'
@@ -39,6 +40,7 @@ const schema = [bedrift(i, Astro.site!, harBilde(karusell[0]?.bilde) ? bildeUrl(
     <span class="strek strek--tett"></span>
     {i?.omTekst && <p class="ingress forside__om">{i.omTekst}</p>}
     <a href="/kontakt" class="knapp knapp--full-mobil forside__knapp">{i?.knappetekst || 'Sjekk om datoen er ledig'}</a>
+    <Profiler innstillinger={i} />
   </section>
 
   <section id="tjenester" class="seksjon">

@@ -3,6 +3,7 @@
 // Med DEMO=1 brukes eksempelinnholdet fra skissene i stedet for Sanity.
 import * as Q from './queries'
 import type {Faq, Innstillinger, Kategori, Omtale, StoryKort} from './typer'
+import {utenPlassholder} from './tekst'
 
 const DEMO = import.meta.env.DEMO === '1' || process.env.DEMO === '1'
 
@@ -53,8 +54,12 @@ export const innstillinger = () => q<Innstillinger>(Q.INNSTILLINGER)
 export const kategorier = () => q<Kategori[]>(Q.KATEGORIER)
 export const stories = () => q<StoryKort[]>(Q.STORIES)
 export const galleri = () => q<GalleriStory[]>(Q.GALLERI)
-export const faqForside = () => q<Faq[]>(Q.FAQ_FORSIDE)
-export const faqKategori = (kategoriId: string) => q<Faq[]>(Q.FAQ_KATEGORI, {kategoriId})
+function reneSporsmal(liste: Faq[]) {
+  return liste.map((f) => ({...f, svar: utenPlassholder(f.svar)})).filter((f) => f.sporsmal && f.svar)
+}
+
+export const faqForside = async () => reneSporsmal(await q<Faq[]>(Q.FAQ_FORSIDE))
+export const faqKategori = async (kategoriId: string) => reneSporsmal(await q<Faq[]>(Q.FAQ_KATEGORI, {kategoriId}))
 export const omtaleForside = () => q<Omtale>(Q.OMTALE_FORSIDE)
 export const sider = () => q<Side[]>(Q.SIDER)
 

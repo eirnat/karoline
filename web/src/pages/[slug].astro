@@ -7,6 +7,7 @@ import StoryKort from '../components/StoryKort.astro'
 import Faq from '../components/Faq.astro'
 import Kontaktfelt from '../components/Kontaktfelt.astro'
 import Kontaktskjema from '../components/Kontaktskjema.astro'
+import Profiler from '../components/Profiler.astro'
 import {innstillinger, kategorier, sider, stories, faqKategori, type Side} from '../lib/data'
 import {faqSide, tjeneste} from '../lib/schema'
 import {kortTekst, utenPlassholder} from '../lib/tekst'
@@ -33,7 +34,9 @@ const oppdrag = kategori ? (await stories()).filter((s) => s.kategori.slug === k
 const faq = kategori ? await faqKategori(kategori._id) : []
 const erBryllup = kategori?.slug === 'bryllup'
 const tekstHtml = (kategori?.tekst || side?.tekst) ? toHTML((kategori?.tekst || side?.tekst) as never) : ''
-const ingress = kategori ? kategori.ingress || [kategori.kortTekst, utenPlassholder(kategori.prisFra)].filter(Boolean).join(' ') : side?.ingress
+const ingress = kategori
+  ? kategori.ingress || [kategori.kortTekst, utenPlassholder(kategori.prisFra)].filter(Boolean).join(' ')
+  : side?.ingress || (side?.slug === 'om' ? i?.omTekst : undefined)
 const erKontakt = side?.slug === 'kontakt'
 const aktiv = erBryllup ? 'bryllup' : kategori ? 'andre' : side?.slug === 'om' ? 'om' : erKontakt ? 'kontakt' : undefined
 const tittel = kategori ? kategori.navn : side!.tittel
@@ -90,7 +93,12 @@ const schema = kategori ? ([tjeneste(kategori, Astro.site!), faqSide(faq)].filte
     )
   }
 
-  {erKontakt && <section class="seksjon kontaktside"><Kontaktskjema kategorier={alleKategorier} /></section>}
+  {erKontakt && (
+    <section class="seksjon kontaktside">
+      <Profiler innstillinger={i} />
+      <Kontaktskjema kategorier={alleKategorier} />
+    </section>
+  )}
 
   <Faq sporsmal={faq} />
 
@@ -151,6 +159,9 @@ const schema = kategori ? ([tjeneste(kategori, Astro.site!), faqSide(faq)].filte
   }
   .kontaktside {
     padding-top: 0;
+  }
+  .kontaktside :global(.profiler) {
+    margin-bottom: 40px;
   }
   @media (max-width: 720px) {
     .topptekst {

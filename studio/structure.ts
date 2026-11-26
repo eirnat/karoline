@@ -3,7 +3,6 @@ import {CogIcon} from '@sanity/icons/Cog'
 import {DocumentTextIcon} from '@sanity/icons/DocumentText'
 import {HelpCircleIcon} from '@sanity/icons/HelpCircle'
 import {CommentIcon} from '@sanity/icons/Comment'
-import {PinIcon} from '@sanity/icons/Pin'
 import {TagIcon} from '@sanity/icons/Tag'
 import {HeartIcon} from '@sanity/icons/Heart'
 import {UsersIcon} from '@sanity/icons/Users'
@@ -47,7 +46,6 @@ export const structure: StructureResolver = (S) =>
       S.documentTypeListItem('page').title('Sider (Om, Kontakt, Priser)').icon(DocumentTextIcon),
       S.documentTypeListItem('faq').title('Spørsmål og svar').icon(HelpCircleIcon),
       S.documentTypeListItem('testimonial').title('Omtaler').icon(CommentIcon),
-      S.documentTypeListItem('location').title('Steder').icon(PinIcon),
       S.documentTypeListItem('category').title('Tjenester og priser').icon(TagIcon),
       S.divider(),
       S.listItem()

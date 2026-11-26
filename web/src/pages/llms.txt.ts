@@ -1,7 +1,7 @@
 // Kort, ren tekst om bedriften og alle oppdrag, for KI-tjenester (llmstxt.org).
 import type {APIRoute} from 'astro'
 import {innstillinger, kategorier, stories, faqForside} from '../lib/data'
-import {kortTekst, storyUrl, typeTekst, utenPlassholder} from '../lib/tekst'
+import {googleAdresse, instagramAdresse, kortTekst, storyUrl, typeTekst, utenPlassholder} from '../lib/tekst'
 
 export const GET: APIRoute = async ({site}) => {
   const i = await innstillinger()
@@ -14,6 +14,7 @@ export const GET: APIRoute = async ({site}) => {
     `# ${i?.navn || 'Fotograf Karoline Rage'}`,
     '',
     `> ${i?.etikett || 'Bryllupsfotograf'}. ${i?.omTekst || ''}`.trim(),
+    ...(i?.omrader?.length ? ['', `Områder: ${i.omrader.join(', ')}.`] : []),
     '',
     '## Tjenester',
     ...k.map((x) => `- [${x.navn}](${url('/' + x.slug)}): ${[x.kortTekst, utenPlassholder(x.prisFra)].filter(Boolean).join(' ')}`),
@@ -25,6 +26,8 @@ export const GET: APIRoute = async ({site}) => {
     '## Kontakt',
     `- [Send forespørsel](${url('/kontakt')})`,
     ...(utenPlassholder(i?.epost) ? [`- E-post: ${i!.epost}`] : []),
+    ...(instagramAdresse(i?.instagram) ? [`- [Instagram](${instagramAdresse(i?.instagram)})`] : []),
+    ...(googleAdresse(i?.googleUrl) ? [`- [Google-profil](${googleAdresse(i?.googleUrl)})`] : []),
   ]
   return new Response(linjer.join('\n') + '\n', {headers: {'Content-Type': 'text/plain; charset=utf-8'}})
 }

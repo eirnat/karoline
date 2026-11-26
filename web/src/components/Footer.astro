@@ -1,12 +1,14 @@
 ---
 import type {Innstillinger, Kategori} from '../lib/typer'
+import {googleAdresse, instagramAdresse} from '../lib/tekst'
 interface Props {
   innstillinger: Innstillinger
   kategorier: Kategori[]
 }
 const {innstillinger: i, kategorier} = Astro.props
 const aar = new Date().getFullYear()
-const ig = i?.instagram?.replace(/^@/, '')
+const instagram = instagramAdresse(i?.instagram)
+const google = googleAdresse(i?.googleUrl)
 ---
 
 <footer class="bunn">
@@ -22,13 +24,21 @@ const ig = i?.instagram?.replace(/^@/, '')
         </p>
       </div>
       {
-        ig && (
+        (instagram || google) && (
           <div>
             <p class="etikett etikett--liten">Følg</p>
             <p>
-              <a href={`https://www.instagram.com/${ig}/`} rel="me">
-                Instagram @{ig}
-              </a>
+              {instagram && (
+                <a href={instagram} rel="me">
+                  Instagram
+                </a>
+              )}
+              {instagram && google && <br />}
+              {google && (
+                <a href={google} rel="noopener noreferrer">
+                  Google-profil
+                </a>
+              )}
             </p>
           </div>
         )

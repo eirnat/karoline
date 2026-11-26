@@ -44,6 +44,8 @@ export default defineConfig({
       SINGLETONS.has(schemaType)
         ? prev.filter(({action}) => action && ['publish', 'discardChanges', 'restore'].includes(action))
         : prev,
-    newDocumentOptions: (prev) => prev.filter((item) => !SINGLETONS.has(item.templateId)),
+    // Steder har ingen egen liste. De lages fra feltet «Sted» på et oppdrag.
+    newDocumentOptions: (prev, {creationContext}) =>
+      prev.filter((item) => !SINGLETONS.has(item.templateId) && (creationContext.type !== 'global' || item.templateId !== 'location')),
   },
 })

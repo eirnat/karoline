@@ -43,5 +43,22 @@ export function kortTekst(tekst = '', maks = 155) {
 
 // Plassholdere i hakeparentes fra skissene skal ikke sendes til Google
 export function utenPlassholder(t?: string) {
-  return t && !/^\s*\[.*\]\s*$/.test(t) ? t : ''
+  if (!t) return ''
+  return t
+    .replace(/\s*\[[^[\]]*\]/g, '')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/\s+([.,;:])/g, '$1')
+    .trim()
+}
+
+export function instagramAdresse(brukernavn?: string) {
+  const ig = brukernavn?.replace(/^@/, '').trim()
+  if (!ig || ig.startsWith('[')) return ''
+  return `https://www.instagram.com/${ig}/`
+}
+
+export function googleAdresse(url?: string) {
+  const u = url?.trim()
+  if (!u || u.startsWith('[') || !u.startsWith('https://')) return ''
+  return u
 }

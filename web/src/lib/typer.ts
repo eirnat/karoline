@@ -50,6 +50,7 @@ export type Innstillinger = {
   epost?: string
   telefon?: string
   instagram?: string
+  googleUrl?: string
   orgnr?: string
   poststed?: string
   omrader?: string[]

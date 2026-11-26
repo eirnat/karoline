@@ -1,23 +1,41 @@
 // Strukturerte data (schema.org) som gjør at Google og KI-tjenester forstår siden.
 import type {Faq, Innstillinger, Kategori} from './typer'
-import {utenPlassholder} from './tekst'
+import {googleAdresse, instagramAdresse, utenPlassholder} from './tekst'
 
 export function bedrift(i: Innstillinger, site: URL, bilde?: string) {
-  const ig = i?.instagram?.replace(/^@/, '')
+  const bedriftId = new URL('/#bedrift', site).href
+  const personId = new URL('/#karoline', site).href
+  const samme = [instagramAdresse(i?.instagram), googleAdresse(i?.googleUrl)].filter(Boolean)
+  const kart = googleAdresse(i?.googleUrl)
   return {
     '@context': 'https://schema.org',
-    '@type': 'ProfessionalService',
-    '@id': new URL('/#bedrift', site).href,
-    name: i?.navn || 'Fotograf Karoline Rage',
-    description: i?.omTekst,
-    url: site.href,
-    image: bilde,
-    email: utenPlassholder(i?.epost) || undefined,
-    telephone: utenPlassholder(i?.telefon) || undefined,
-    areaServed: i?.omrader?.map((o) => ({'@type': 'AdministrativeArea', name: o})),
-    address: i?.poststed ? {'@type': 'PostalAddress', addressLocality: i.poststed, addressCountry: 'NO'} : undefined,
-    sameAs: ig && !ig.startsWith('[') ? [`https://www.instagram.com/${ig}/`] : undefined,
-    knowsAbout: ['Bryllupsfotografering', 'Familiefotografering', 'Portrettfotografering'],
+    '@graph': [
+      {
+        '@type': 'ProfessionalService',
+        '@id': bedriftId,
+        name: i?.navn || 'Fotograf Karoline Rage',
+        description: i?.omTekst,
+        url: site.href,
+        image: bilde,
+        email: utenPlassholder(i?.epost) || undefined,
+        telephone: utenPlassholder(i?.telefon) || undefined,
+        areaServed: i?.omrader?.map((o) => ({'@type': 'AdministrativeArea', name: o})),
+        address: i?.poststed ? {'@type': 'PostalAddress', addressLocality: i.poststed, addressCountry: 'NO'} : undefined,
+        sameAs: samme.length ? samme : undefined,
+        hasMap: kart || undefined,
+        knowsAbout: ['Bryllupsfotografering', 'Familiefotografering', 'Kjærestebilder', 'Ansattbilder', 'Portrettfotografering'],
+        founder: {'@id': personId},
+      },
+      {
+        '@type': 'Person',
+        '@id': personId,
+        name: 'Karoline Rage',
+        jobTitle: 'Fotograf',
+        url: new URL('/om', site).href,
+        worksFor: {'@id': bedriftId},
+        sameAs: samme.length ? samme : undefined,
+      },
+    ],
   }
 }
 
@@ -27,10 +45,10 @@ export function tjeneste(k: Kategori, site: URL) {
     '@type': 'Service',
     name: `${k.navn} – fotografering`,
     serviceType: k.navn,
-    description: k.ingress || k.kortTekst,
+    description: utenPlassholder(k.ingress || k.kortTekst),
     url: new URL(`/${k.slug}`, site).href,
     provider: {'@id': new URL('/#bedrift', site).href},
-    offers: utenPlassholder(k.prisFra) ? {'@type': 'Offer', description: k.prisFra, priceCurrency: 'NOK'} : undefined,
+    offers: utenPlassholder(k.prisFra) ? {'@type': 'Offer', description: utenPlassholder(k.prisFra), priceCurrency: 'NOK'} : undefined,
   }
 }
 

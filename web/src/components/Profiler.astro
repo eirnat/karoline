@@ -1,0 +1,44 @@
+---
+import type {Innstillinger} from '../lib/typer'
+import {googleAdresse, instagramAdresse} from '../lib/tekst'
+
+interface Props {
+  innstillinger: Innstillinger
+}
+const {innstillinger: i} = Astro.props
+const instagram = instagramAdresse(i?.instagram)
+const google = googleAdresse(i?.googleUrl)
+---
+
+{
+  (instagram || google) && (
+    <p class="profiler">
+      {instagram && (
+        <a href={instagram} rel="me">
+          Instagram
+        </a>
+      )}
+      {google && (
+        <a href={google} rel="noopener noreferrer">
+          Google-profil
+        </a>
+      )}
+    </p>
+  )
+}
+
+<style>
+  .profiler {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 20px;
+    margin-top: 28px;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .profiler a {
+    text-decoration: none;
+  }
+</style>
