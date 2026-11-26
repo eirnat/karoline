@@ -5,15 +5,15 @@ import * as Q from './queries'
 const kat = {
   bryllup: {_id: 'kategori-bryllup', navn: 'Bryllup', slug: 'bryllup'},
   familie: {_id: 'kategori-familie', navn: 'Familie', slug: 'familie'},
-  tur: {_id: 'kategori-tur', navn: 'Tur og kjæreste', slug: 'tur'},
+  tur: {_id: 'kategori-tur', navn: 'Kjærestebilder', slug: 'tur'},
   ansatt: {_id: 'kategori-ansatt', navn: 'Ansattbilder', slug: 'ansattbilder'},
 }
 
 const kategorier = [
-  {...kat.bryllup, kortTekst: 'Fra forberedelsene om morgenen til første dans. Jeg dokumenterer hele dagen deres – de store øyeblikkene og alt det små imellom.', prisFra: 'Heldag fra 40 000 kr inkl. mva.', ingress: 'Bryllupsfotograf i Rogaland og på Vestlandet. Heldag fra 40 000 kr inkl. mva.'},
-  {...kat.familie, kortTekst: 'Ute i naturen, i deres tempo.', prisFra: 'Fra [PRIS] kr'},
-  {...kat.tur, kortTekst: 'Forlovelse, kjæreste eller bare dere to på tur.', prisFra: 'Fra [PRIS] kr'},
-  {...kat.ansatt, kortTekst: 'Naturlige portretter for nettside og LinkedIn.', prisFra: 'Fra [PRIS] kr per ansatt'},
+  {...kat.bryllup, kortTekst: 'Fra nervøse hender om morgenen til siste dans. Jeg er med hele dagen og fanger det store og alt det små imellom – tårene, latteren og blikkene dere ikke visste at noen så.', prisFra: 'Heldag fra 40 000 kr inkl. mva.', ingress: 'Bryllupsfotograf i Rogaland og på Vestlandet. Heldag fra 40 000 kr inkl. mva.'},
+  {...kat.familie, kortTekst: 'Dere, slik dere er akkurat nå – ute i naturen og i deres eget tempo.', prisFra: 'Fra [PRIS] kr'},
+  {...kat.tur, kortTekst: 'Forlovelse, eller bare dere to – tett på hverandre og uten hastverk.', prisFra: 'Fra [PRIS] kr'},
+  {...kat.ansatt, kortTekst: 'Naturlige portretter på arbeidsplassen eller ute – bilder som faktisk ligner på dere.', prisFra: 'Fra [PRIS] kr per ansatt'},
 ]
 
 const fortelling =
@@ -88,8 +88,9 @@ const galleri = [
 ]
 
 const faq = [
-  {sporsmal: 'Hva koster bryllupsfotografering?', svar: 'Heldagsbryllup koster 40 000 kr inkl. mva. [Hva som er inkludert: antall timer, omtrent antall bilder og hvordan de leveres.]'},
-  {sporsmal: 'Fotograferer du utenfor Rogaland?', svar: 'Ja. Jeg har fotografert bryllup blant annet i Oslo, Bremanger, Florø, Hardanger, Gulen, Sotra og Italia. [Hvordan reisekostnader beregnes.]'},
+  {sporsmal: 'Hva koster bryllupsfotografering?', svar: 'Heldagsbryllup koster 40 000 kr inkl. mva. [Hva som er inkludert: antall timer og hvordan bildene leveres.]'},
+  {sporsmal: 'Hvor fotograferer du?', svar: 'Jeg fotograferer i Rogaland, på Vestlandet og ellers i hele Norge. Jeg har blant annet fotografert bryllup i Oslo, Bremanger, Florø, Hardanger, Gulen, Sotra og Italia. [Hvordan reisekostnader beregnes.]'},
+  {sporsmal: 'Hvor mange bilder får vi?', svar: '[Omtrent hvor mange bilder dere får fra et heldagsbryllup, f.eks. «mellom X og Y».]'},
   {sporsmal: 'Når får vi bildene?', svar: '[Leveringstid, f.eks. antall uker etter bryllupet.]'},
   {sporsmal: 'Hvordan booker vi?', svar: 'Send en forespørsel med dato og sted, så svarer jeg så fort jeg kan. Hører dere ikke fra meg innen en uke, ta gjerne en titt i søppelposten.'},
 ]
@@ -98,10 +99,10 @@ const innstillinger = {
   etikett: 'Bryllupsfotograf · Rogaland, Vestlandet og hele Norge',
   overskrift: 'Bilder som tar dere tilbake til dagen',
   omTekst:
-    'Jeg heter Karoline og har fotografert bryllup og livets store øyeblikk siden 2011. Helst ute i vill natur, og alltid midt mellom det ekte og det ærlige – slik at øyeblikkene kan leve videre i flere generasjoner.',
+    'Hei, jeg heter Karoline. Siden 2011 har jeg fotografert bryllup og livets store øyeblikk – helst ute, der vinden tar tak i sløret og lyset skifter fra minutt til minutt. Jeg ser etter det ekte: blikkene, latteren og de små pausene ingen planla. Bilder dere kan vende tilbake til, og som kan leve videre i generasjoner.',
   knappetekst: 'Sjekk om datoen er ledig',
   kontaktOverskrift: 'Skal dere gifte dere?',
-  kontaktTekst: 'Fortell meg litt om dagen deres, så sjekker jeg om datoen er ledig.',
+  kontaktTekst: 'Fortell meg om dagen deres – hvor, når og hva som betyr mest for dere. Så sjekker jeg om datoen er ledig.',
   navn: 'Fotograf Karoline Rage',
   epost: '[e-post]',
   telefon: '[telefon]',
@@ -113,7 +114,7 @@ const innstillinger = {
 
 const sider = [
   {tittel: 'Om Karoline', slug: 'om', ingress: innstillinger.omTekst},
-  {tittel: 'Kontakt', slug: 'kontakt', ingress: 'Fortell meg litt om dagen deres eller oppdraget, så tar jeg kontakt.'},
+  {tittel: 'Kontakt', slug: 'kontakt', ingress: 'Fortell meg om dere og det dere ønsker dere – sted, dato og stemning. Jeg leser alt og svarer så fort jeg kan.'},
 ]
 
 export function demoSvar(query: string, params: Record<string, unknown>): unknown {

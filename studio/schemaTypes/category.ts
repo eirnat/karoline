@@ -1,7 +1,7 @@
 import {defineArrayMember, defineField, defineType} from 'sanity'
 import {TagIcon} from '@sanity/icons/Tag'
 
-// En tjeneste: Bryllup, Familie, Tur og kjæreste, Ansattbilder.
+// En tjeneste: Bryllup, Familie, Kjærestebilder, Ansattbilder.
 export const category = defineType({
   name: 'category',
   title: 'Tjeneste',

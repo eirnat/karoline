@@ -14,7 +14,7 @@ import {UserIcon} from '@sanity/icons/User'
 const KATEGORIER = [
   {id: 'kategori-bryllup', tittel: 'Bryllup', ikon: HeartIcon},
   {id: 'kategori-familie', tittel: 'Familie', ikon: UsersIcon},
-  {id: 'kategori-tur', tittel: 'Tur og kjæreste', ikon: SunIcon},
+  {id: 'kategori-tur', tittel: 'Kjærestebilder', ikon: SunIcon},
   {id: 'kategori-ansatt', tittel: 'Ansattbilder', ikon: UserIcon},
 ]
 

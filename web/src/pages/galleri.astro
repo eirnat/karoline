@@ -21,12 +21,12 @@ const FORSTE = 24
 const filtre = [{slug: 'alle', navn: 'Alle'}, ...k.filter((kat) => bilder.some((x) => x.s.kategori.slug === kat.slug))]
 ---
 
-<Base aktiv="galleri" tittel="Galleri" beskrivelse="Et utvalg favorittbilder fra bryllup, familie, tur og ansattbilder av fotograf Karoline Rage.">
+<Base aktiv="galleri" tittel="Galleri" beskrivelse="Et utvalg favorittbilder fra bryllup, familie, kjærestebilder og ansattbilder av fotograf Karoline Rage.">
   <section class="topptekst">
     <p class="etikett">Portefølje</p>
     <h1>Galleri</h1>
     <span class="strek strek--tett"></span>
-    <p class="ingress">Et utvalg favorittbilder fra bryllup, familie, tur og ansattbilder. Trykk på et bilde for å se det større og finne oppdraget det hører til.</p>
+    <p class="ingress">Noen av mine favoritter – fra bryllup og familier til kjærestepar og ansatte. Trykk på et bilde for å se det større og finne historien det hører til.</p>
   </section>
 
   <div role="group" aria-label="Filtrer bilder" class="filter">
@@ -86,7 +86,7 @@ const filtre = [{slug: 'alle', navn: 'Alle'}, ...k.filter((kat) => bilder.some((
     </div>
   </dialog>
 
-  <Kontaktfelt gra overskrift="Liker du det du ser?" tekst="Fortell meg litt om dagen deres eller oppdraget, så tar jeg kontakt." />
+  <Kontaktfelt gra overskrift="Liker du det du ser?" tekst="Fortell meg om dagen deres, eller hva du ønsker deg bilder av, så tar jeg kontakt." />
 </Base>
 
 <script>

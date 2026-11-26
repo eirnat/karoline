@@ -81,7 +81,7 @@ const schema = [
 const pris = utenPlassholder(s.kategori.prisFra)
 const kontaktTekst = [
   pris ? pris.replace(/\.?\s*$/, '.') : '',
-  erBryllup ? i?.kontaktTekst : 'Fortell meg litt om hva du ønsker, så tar jeg kontakt.',
+  erBryllup ? i?.kontaktTekst : 'Fortell meg litt om hvem dere er og hva dere ønsker dere, så finner vi et sted og en dag sammen.',
 ]
   .filter(Boolean)
   .join(' ')
@@ -218,7 +218,7 @@ const delUrl = encodeURIComponent(side)
 
   <Kontaktfelt
     gra
-    overskrift={erBryllup ? i?.kontaktOverskrift : 'Vil du ha slike bilder?'}
+    overskrift={erBryllup ? i?.kontaktOverskrift : 'Vil dere ha bilder som dette?'}
     tekst={kontaktTekst}
   />
 </Base>

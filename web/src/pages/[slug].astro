@@ -17,7 +17,7 @@ export async function getStaticPaths() {
   const s = (await sider()).filter((x) => !k.some((y) => y.slug === x.slug))
   const faste: Side[] = [
     {tittel: 'Om meg', slug: 'om'},
-    {tittel: 'Kontakt', slug: 'kontakt', ingress: 'Fortell meg litt om dagen deres eller oppdraget, så tar jeg kontakt.'},
+    {tittel: 'Kontakt', slug: 'kontakt', ingress: 'Fortell meg om dere og det dere ønsker dere – sted, dato og stemning. Jeg leser alt og svarer så fort jeg kan.'},
   ].filter((f) => !s.some((x) => x.slug === f.slug))
   return [
     ...k.map((kat) => ({params: {slug: kat.slug}, props: {kategori: kat, side: null}})),
@@ -86,7 +86,7 @@ const schema = kategori ? ([tjeneste(kategori, Astro.site!), faqSide(faq)].filte
 
   {
     kategori && oppdrag.length === 0 && (
-      <p class="tomt">Her kommer det snart eksempler. Ta gjerne kontakt i mellomtiden.</p>
+      <p class="tomt">Flere bilder kommer snart. Ta gjerne kontakt i mellomtiden – jeg viser gjerne mer.</p>
     )
   }
 
@@ -94,7 +94,7 @@ const schema = kategori ? ([tjeneste(kategori, Astro.site!), faqSide(faq)].filte
 
   <Faq sporsmal={faq} />
 
-  {!erKontakt && <Kontaktfelt overskrift={erBryllup ? i?.kontaktOverskrift : 'Lyst på bilder?'} tekst={erBryllup ? i?.kontaktTekst : 'Fortell meg litt om hva du ønsker, så tar jeg kontakt.'} />}
+  {!erKontakt && <Kontaktfelt overskrift={erBryllup ? i?.kontaktOverskrift : 'Lyst på bilder?'} tekst={erBryllup ? i?.kontaktTekst : 'Fortell meg litt om hvem dere er og hva dere ønsker dere, så finner vi et sted og en dag sammen.'} />}
 </Base>
 
 <style>
