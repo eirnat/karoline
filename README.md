@@ -20,7 +20,7 @@ Krever Node 22 (`node --version`).
    cp .env.example .env
    ```
 
-   **Hvor: Cursor**, `studio/.env`: fyll inn `SANITY_STUDIO_PROJECT_ID`. Lagre filen.
+   Prosjekt-ID-en (`ujffh8q9`) står allerede i `.env.example` og i koden.
 
    ```bash
    npm run dev          # Studio på http://localhost:3333
@@ -40,7 +40,7 @@ Krever Node 22 (`node --version`).
    cp .env.example .env
    ```
 
-   **Hvor: Cursor**, `web/.env`: fyll inn `PUBLIC_SANITY_PROJECT_ID`. **Lagre filen og start serveren på nytt** etter hver endring i `.env`.
+   Endrer du noe i `web/.env`: **lagre filen og start serveren på nytt**.
 
    ```bash
    npm run dev          # http://localhost:4321, henter fra Sanity
@@ -70,9 +70,9 @@ Adresser: tjenester ligger på `/bryllup`, `/familie`, `/tur`, `/ansattbilder`, 
 
 1. **Hvor: GitHub** → Settings → Secrets and variables → Actions:
    - Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`
-   - Variables: `PUBLIC_SANITY_PROJECT_ID`, `PUBLIC_SANITY_DATASET` (`production`), valgfritt `PUBLIC_TURNSTILE_SITE_KEY` og `SITE_URL`
+   - Variables (valgfritt): `PUBLIC_TURNSTILE_SITE_KEY`, `SITE_URL`, og `PUBLIC_SANITY_PROJECT_ID` hvis du vil bruke et annet prosjekt
 
-   Workflowen hoppes over til `PUBLIC_SANITY_PROJECT_ID` er lagt inn.
+   Prosjekt-ID-en `ujffh8q9` er lagt inn i koden. Siden bygges ved hver endring, men legges ikke ut før Cloudflare-nøklene finnes.
 2. **Hvor: Sanity** → API → Webhooks: URL `https://api.github.com/repos/eirnat/karoline/dispatches`, projeksjon `{"event_type": "sanity-publish"}`, header `Authorization: Bearer <GitHub-token>`.
 3. **Hvor: Terminal**, i `studio/`: `npm run deploy` legger ut Studio på `karolinerage.sanity.studio`.
 

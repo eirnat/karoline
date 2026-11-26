@@ -1,10 +1,11 @@
 import {createClient, type QueryParams, type SanityClient} from '@sanity/client'
 
-const projectId = import.meta.env.PUBLIC_SANITY_PROJECT_ID
+// Prosjekt-ID-en er ikke hemmelig. .env kan overstyre den, f.eks. mot et testprosjekt.
+const projectId = import.meta.env.PUBLIC_SANITY_PROJECT_ID || 'ujffh8q9'
 const dataset = import.meta.env.PUBLIC_SANITY_DATASET || 'production'
 
-// Brukes av bilde-URL-ene. I demomodus finnes ingen bilder, så en tom ID er ufarlig.
-export const sanityConfig = {projectId: projectId || 'demo', dataset}
+// Brukes av bilde-URL-ene.
+export const sanityConfig = {projectId, dataset}
 
 let klient: SanityClient | null = null
 

@@ -8,7 +8,7 @@ if (existsSync('.env')) process.loadEnvFile('.env')
 const linjer = []
 
 if (process.env.DEMO !== '1') {
-  const projectId = process.env.PUBLIC_SANITY_PROJECT_ID
+  const projectId = process.env.PUBLIC_SANITY_PROJECT_ID || 'ujffh8q9'
   if (!projectId) {
     console.error('redirects: PUBLIC_SANITY_PROJECT_ID mangler – hopper over.')
     process.exit(1)
