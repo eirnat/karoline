@@ -1,0 +1,23 @@
+---
+import type {Faq} from '../lib/typer'
+interface Props {
+  sporsmal: Faq[]
+  tittel?: string
+}
+const {sporsmal, tittel = 'Ofte stilte spørsmål'} = Astro.props
+---
+
+{
+  sporsmal.length > 0 && (
+    <section class="faq">
+      <h2 class="h-seksjon">{tittel}</h2>
+      <span class="strek" />
+      {sporsmal.map((f, n) => (
+        <details open={n === 0}>
+          <summary>{f.sporsmal}</summary>
+          <p>{f.svar}</p>
+        </details>
+      ))}
+    </section>
+  )
+}

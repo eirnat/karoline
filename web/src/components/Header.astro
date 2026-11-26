@@ -1,0 +1,148 @@
+---
+import Logo from './Logo.astro'
+
+interface Props {
+  aktiv?: 'hjem' | 'bryllup' | 'andre' | 'galleri' | 'om' | 'kontakt'
+}
+const {aktiv} = Astro.props
+
+const MENY = [
+  {id: 'hjem', tekst: 'Hjem', href: '/'},
+  {id: 'bryllup', tekst: 'Bryllup', href: '/bryllup'},
+  {id: 'andre', tekst: 'Andre oppdrag', href: '/#tjenester'},
+  {id: 'galleri', tekst: 'Galleri', href: '/galleri'},
+  {id: 'om', tekst: 'Om', href: '/om'},
+  {id: 'kontakt', tekst: 'Kontakt', href: '/kontakt'},
+] as const
+---
+
+<header class="topp">
+  <div class="topp__pc">
+    <Logo />
+    <nav aria-label="Hovedmeny" class="meny">
+      {
+        MENY.map((m) => (
+          <a href={m.href} aria-current={m.id === aktiv ? 'page' : undefined}>
+            {m.tekst}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+
+  <div class="topp__mobil">
+    <span aria-hidden="true" class="topp__luft"></span>
+    <Logo storrelse="liten" />
+    <button type="button" class="hamburger" aria-label="Åpne meny" aria-expanded="false" aria-controls="mobilmeny">
+      <svg aria-hidden="true" width="24" height="16" viewBox="0 0 24 16" fill="none" stroke="currentColor" stroke-width="1.2">
+        <line x1="0" y1="1" x2="24" y2="1"></line><line x1="0" y1="8" x2="24" y2="8"></line><line x1="0" y1="15" x2="24" y2="15"></line>
+      </svg>
+    </button>
+  </div>
+
+  <nav id="mobilmeny" class="mobilmeny" aria-label="Hovedmeny" hidden>
+    {
+      MENY.map((m) => (
+        <a href={m.href} aria-current={m.id === aktiv ? 'page' : undefined}>
+          {m.tekst}
+        </a>
+      ))
+    }
+  </nav>
+</header>
+
+<script>
+  const knapp = document.querySelector<HTMLButtonElement>('.hamburger')
+  const meny = document.getElementById('mobilmeny')
+  knapp?.addEventListener('click', () => {
+    const apen = knapp.getAttribute('aria-expanded') === 'true'
+    knapp.setAttribute('aria-expanded', String(!apen))
+    knapp.setAttribute('aria-label', apen ? 'Åpne meny' : 'Lukk meny')
+    if (meny) meny.hidden = apen
+    document.body.style.overflow = apen ? '' : 'hidden'
+  })
+  meny?.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).tagName === 'A') knapp?.click()
+  })
+</script>
+
+<style>
+  .topp__pc {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    padding: 40px 16px;
+  }
+  .meny {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px clamp(4px, 3vw, 56px);
+  }
+  .meny a,
+  .mobilmeny a {
+    padding: 13px 28px;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--svart);
+    border: 2px solid transparent;
+  }
+  .meny a[aria-current='page'],
+  .meny a:hover {
+    border-color: var(--svart);
+  }
+  .topp__mobil,
+  .mobilmeny {
+    display: none;
+  }
+
+  @media (max-width: 720px) {
+    .topp {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: var(--hvit);
+    }
+    .topp__pc {
+      display: none;
+    }
+    .topp__mobil {
+      height: var(--mobil-topp);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px;
+      border-bottom: 1px solid var(--lysgra);
+    }
+    .topp__luft,
+    .hamburger {
+      width: 48px;
+      height: 48px;
+    }
+    .hamburger {
+      background: transparent;
+      border: 0;
+      color: var(--svart);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mobilmeny:not([hidden]) {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      position: fixed;
+      inset: var(--mobil-topp) 0 0 0;
+      padding: 48px 24px;
+      background: var(--hvit);
+    }
+    .mobilmeny a[aria-current='page'] {
+      border-color: var(--svart);
+    }
+  }
+</style>

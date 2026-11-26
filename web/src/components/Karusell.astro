@@ -1,0 +1,134 @@
+---
+// Bildekarusell i full bredde (PC) og full skjermhøyde (mobil). Sveip eller bruk pilene.
+import Bilde from './Bilde.astro'
+import type {Bilde as BildeT} from '../lib/typer'
+
+interface Props {
+  bilder: {bilde: BildeT; alt: string}[]
+}
+const {bilder} = Astro.props
+const lysbilder = bilder.length ? bilder : [{bilde: null, alt: 'Bryllupsbilde'}]
+---
+
+<section class="karusell" aria-label="Utvalgte bilder" aria-roledescription="karusell">
+  <div class="karusell__spor" tabindex="0">
+    {
+      lysbilder.map((l, n) => (
+        <div class="karusell__lysbilde" aria-roledescription="lysbilde" aria-label={`${n + 1} av ${lysbilder.length}`}>
+          <Bilde bilde={l.bilde} alt={l.alt} i={n} lazy={n > 0} sizes="100vw" bredder={[800, 1400, 2000, 2800]} class="karusell__bilde" />
+        </div>
+      ))
+    }
+  </div>
+  {
+    lysbilder.length > 1 && (
+      <>
+        <button type="button" class="karusell__pil karusell__pil--forrige" aria-label="Forrige bilde">
+          <svg aria-hidden="true" width="22" height="40" viewBox="0 0 22 40" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polyline points="20,2 2,20 20,38" />
+          </svg>
+        </button>
+        <button type="button" class="karusell__pil karusell__pil--neste" aria-label="Neste bilde">
+          <svg aria-hidden="true" width="22" height="40" viewBox="0 0 22 40" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polyline points="2,2 20,20 2,38" />
+          </svg>
+        </button>
+        <div class="karusell__prikker" aria-hidden="true">
+          {lysbilder.map((_, n) => (
+            <span class:list={['karusell__prikk', {aktiv: n === 0}]} />
+          ))}
+        </div>
+      </>
+    )
+  }
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.karusell').forEach((k) => {
+    const spor = k.querySelector<HTMLElement>('.karusell__spor')!
+    const prikker = [...k.querySelectorAll<HTMLElement>('.karusell__prikk')]
+    const antall = spor.children.length
+    const naa = () => Math.round(spor.scrollLeft / spor.clientWidth)
+    const gaaTil = (n: number) => spor.scrollTo({left: ((n + antall) % antall) * spor.clientWidth, behavior: 'smooth'})
+    k.querySelector('.karusell__pil--forrige')?.addEventListener('click', () => gaaTil(naa() - 1))
+    k.querySelector('.karusell__pil--neste')?.addEventListener('click', () => gaaTil(naa() + 1))
+    spor.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') gaaTil(naa() - 1)
+      if (e.key === 'ArrowRight') gaaTil(naa() + 1)
+    })
+    spor.addEventListener('scroll', () => prikker.forEach((p, n) => p.classList.toggle('aktiv', n === naa())), {passive: true})
+  })
+</script>
+
+<style>
+  .karusell {
+    position: relative;
+  }
+  .karusell__spor {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .karusell__spor::-webkit-scrollbar {
+    display: none;
+  }
+  .karusell__lysbilde {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+  }
+  .karusell :global(.karusell__bilde) {
+    aspect-ratio: auto !important;
+    height: clamp(420px, 52vw, 760px);
+  }
+  .karusell__pil {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    background: transparent;
+    border: 0;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .karusell__pil--forrige {
+    left: 16px;
+  }
+  .karusell__pil--neste {
+    right: 16px;
+  }
+  .karusell__prikker {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+  .karusell__prikk {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+  }
+  .karusell__prikk.aktiv {
+    background: #fff;
+  }
+  @media (max-width: 720px) {
+    .karusell :global(.karusell__bilde) {
+      height: calc(100svh - var(--mobil-topp));
+    }
+    .karusell__pil {
+      display: none;
+    }
+    .karusell__prikker {
+      bottom: 24px;
+      gap: 8px;
+    }
+  }
+</style>

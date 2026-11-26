@@ -1,0 +1,57 @@
+---
+// Ett bilde fra Sanity, i riktig størrelse og format.
+// Mangler bildet, vises en nøytral gråtone (som i skissene) med alt-teksten som etikett.
+import {bildeUrl, harBilde, srcset, tone, forholdFra} from '../lib/bilde'
+import type {Bilde} from '../lib/typer'
+
+interface Props {
+  bilde?: Bilde
+  /** Fast format, f.eks. 4/5 = 0.8. Utelatt = bildets eget format. */
+  forhold?: number
+  sizes?: string
+  bredder?: number[]
+  alt?: string
+  etikett?: string
+  i?: number
+  lazy?: boolean
+  class?: string
+  style?: string
+}
+
+const {
+  bilde,
+  forhold,
+  sizes = '100vw',
+  bredder = [480, 800, 1200, 1600, 2200],
+  alt,
+  etikett,
+  i = 0,
+  lazy = true,
+  class: klasse = '',
+  style = '',
+} = Astro.props
+
+const ar = forhold ?? forholdFra(bilde ?? null)
+const tekst = alt ?? bilde?.alt ?? ''
+const finnes = harBilde(bilde ?? null)
+const bakgrunn = bilde?.lqip ? `background-image:url(${bilde.lqip});background-size:cover;` : `background:${tone(i)};`
+---
+
+<div class={`bilde ${klasse}`} style={`aspect-ratio:${ar};${bakgrunn}${style}`} role={finnes ? undefined : 'img'} aria-label={finnes ? undefined : tekst || undefined}>
+  {
+    finnes && (
+      <img
+        src={bildeUrl(bilde!, 1200, forhold)}
+        srcset={srcset(bilde!, bredder, forhold)}
+        sizes={sizes}
+        alt={tekst}
+        loading={lazy ? 'lazy' : 'eager'}
+        decoding="async"
+        width={1200}
+        height={Math.round(1200 / ar)}
+      />
+    )
+  }
+  {etikett && <span class="bilde__etikett">{etikett}</span>}
+  <slot />
+</div>

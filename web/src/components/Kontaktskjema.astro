@@ -1,0 +1,117 @@
+---
+// Kontaktskjemaet. Sendes til /api/kontakt (Cloudflare Worker i web/worker/index.ts).
+import type {Kategori} from '../lib/typer'
+interface Props {
+  kategorier: Kategori[]
+}
+const {kategorier} = Astro.props
+const turnstile = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY
+---
+
+<form class="skjema" method="post" action="/api/kontakt" data-skjema>
+  <div class="skjema__rad">
+    <label>Navn<input name="navn" autocomplete="name" required /></label>
+    <label>E-post<input name="epost" type="email" autocomplete="email" required /></label>
+  </div>
+  <div class="skjema__rad">
+    <label>Telefon <span>(valgfritt)</span><input name="telefon" type="tel" autocomplete="tel" /></label>
+    <label
+      >Hva gjelder det?
+      <select name="oppdrag">
+        {kategorier.map((k) => <option>{k.navn}</option>)}
+        <option>Annet</option>
+      </select>
+    </label>
+  </div>
+  <div class="skjema__rad">
+    <label>Dato <span>(hvis dere vet den)</span><input name="dato" type="date" /></label>
+    <label>Sted<input name="sted" placeholder="For eksempel Solstua, Oslo" /></label>
+  </div>
+  <label>Fortell litt om dagen eller oppdraget<textarea name="melding" rows="6" required></textarea></label>
+  <input type="text" name="nettside" class="skjult" tabindex="-1" autocomplete="off" aria-hidden="true" />
+  {turnstile && <div class="cf-turnstile" data-sitekey={turnstile} data-language="nb" />}
+  <button type="submit" class="knapp knapp--full-mobil">Send forespørsel</button>
+  <p class="skjema__status" role="status" aria-live="polite"></p>
+</form>
+
+{turnstile && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}
+
+<script>
+  document.querySelectorAll<HTMLFormElement>('[data-skjema]').forEach((f) =>
+    f.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const status = f.querySelector<HTMLElement>('.skjema__status')!
+      const knapp = f.querySelector<HTMLButtonElement>('button[type=submit]')!
+      knapp.disabled = true
+      status.textContent = 'Sender …'
+      try {
+        const svar = await fetch(f.action, {method: 'POST', body: new FormData(f), headers: {Accept: 'application/json'}})
+        const data = await svar.json().catch(() => ({}))
+        if (!svar.ok) throw new Error(data.feil || 'Noe gikk galt.')
+        f.reset()
+        status.textContent = 'Takk! Forespørselen er sendt, og jeg svarer så fort jeg kan.'
+      } catch (err) {
+        status.textContent = `${(err as Error).message} Prøv igjen, eller send en e-post.`
+      } finally {
+        knapp.disabled = false
+      }
+    }),
+  )
+</script>
+
+<style>
+  .skjema {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-align: left;
+  }
+  .skjema__rad {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    gap: 20px;
+  }
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  label span {
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--mellomgra);
+  }
+  input,
+  select,
+  textarea {
+    font: inherit;
+    font-size: 16px;
+    letter-spacing: 0;
+    text-transform: none;
+    padding: 12px 14px;
+    border: 1px solid var(--linjegra);
+    border-radius: 0;
+    background: #fff;
+    color: var(--svart);
+    min-height: 48px;
+  }
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--svart);
+  }
+  button {
+    align-self: center;
+    margin-top: 12px;
+  }
+  .skjema__status {
+    text-align: center;
+    min-height: 1.7em;
+  }
+</style>

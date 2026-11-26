@@ -1,0 +1,498 @@
+---
+// Ett bryllup eller oppdrag, f.eks. /bryllup/lyra-og-stian-solstua-oslo
+import Base from '../../layouts/Base.astro'
+import Bilde from '../../components/Bilde.astro'
+import Kontaktfelt from '../../components/Kontaktfelt.astro'
+import {stories, story as hentStory, innstillinger} from '../../lib/data'
+import {bildeUrl, harBilde} from '../../lib/bilde'
+import {kortTekst, manedAar, sesong, storyUrl, typeKort, typeTekst, utenPlassholder} from '../../lib/tekst'
+import {brodsmuler} from '../../lib/schema'
+import type {Bilde as BildeT} from '../../lib/typer'
+
+export async function getStaticPaths() {
+  const alle = await stories()
+  return alle.map((s) => ({params: {kategori: s.kategori.slug, slug: s.slug}}))
+}
+
+const {slug, kategori} = Astro.params
+const s = await hentStory(slug!)
+if (!s) return Astro.redirect('/404')
+const i = await innstillinger()
+
+// Forrige og neste innen samme kategori
+const isammeKategori = (await stories()).filter((x) => x.kategori.slug === kategori)
+const pos = isammeKategori.findIndex((x) => x.slug === slug)
+const forrige = pos > 0 ? isammeKategori[pos - 1] : null
+const neste = pos >= 0 && pos < isammeKategori.length - 1 ? isammeKategori[pos + 1] : null
+const miniatyr = (x: NonNullable<typeof forrige>) => (harBilde(x.forsidebilde ?? null) ? x.forsidebilde : x.forste)
+
+const erBryllup = s.kategori.slug === 'bryllup'
+const typeNavn = typeTekst(s)
+const etikett = [typeNavn, s.sted, manedAar(s.dato)].filter(Boolean).join(' · ')
+const undertittel = s.lokale ? `${typeNavn} på ${s.lokale}${s.sted ? ` i ${s.sted}` : ''}` : s.sted ? `${typeNavn} i ${s.sted}` : ''
+
+const fakta = [
+  ['Sted', s.sted],
+  ['Lokale', s.lokale],
+  ['Type', erBryllup ? typeKort(s.type) : s.kategori.navn],
+  ['Sesong', sesong(s.dato)],
+].filter(([, v]) => v) as [string, string][]
+
+// Bildemønsteret fra skissen: én bred, to stående, én midtstilt, tre stående – og så på nytt
+const MONSTER = [
+  {antall: 1, type: 'bred'},
+  {antall: 2, type: 'par'},
+  {antall: 1, type: 'midt'},
+  {antall: 3, type: 'tre'},
+] as const
+const bilder = (s.bilder || []).filter(Boolean) as NonNullable<BildeT>[]
+const grupper: {type: (typeof MONSTER)[number]['type']; bilder: NonNullable<BildeT>[]; start: number}[] = []
+for (let n = 0, m = 0; n < bilder.length; m++) {
+  const steg = MONSTER[m % MONSTER.length]
+  grupper.push({type: steg.type, bilder: bilder.slice(n, n + steg.antall), start: n})
+  n += steg.antall
+}
+
+const forsidebilde = harBilde(s.forsidebilde ?? null) ? s.forsidebilde : bilder[0]
+const side = new URL(Astro.url.pathname, Astro.site).href
+const fortelling = utenPlassholder(s.fortelling)
+
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: `${s.navn}${undertittel ? ` – ${undertittel}` : ''}`,
+    description: kortTekst(fortelling || undertittel),
+    datePublished: s.dato,
+    dateModified: s._updatedAt,
+    image: bilder.filter((b) => harBilde(b)).slice(0, 10).map((b) => bildeUrl(b, 1600)),
+    author: {'@type': 'Person', name: 'Karoline Rage'},
+    publisher: {'@id': new URL('/#bedrift', Astro.site).href},
+    contentLocation: s.sted ? {'@type': 'Place', name: [s.lokale, s.sted].filter(Boolean).join(', ')} : undefined,
+    mainEntityOfPage: side,
+  },
+  brodsmuler([
+    {navn: 'Hjem', url: new URL('/', Astro.site).href},
+    {navn: s.kategori.navn, url: new URL(`/${s.kategori.slug}`, Astro.site).href},
+    {navn: s.navn, url: side},
+  ]),
+]
+
+const pris = utenPlassholder(s.kategori.prisFra)
+const kontaktTekst = [
+  pris ? pris.replace(/\.?\s*$/, '.') : '',
+  erBryllup ? i?.kontaktTekst : 'Fortell meg litt om hva du ønsker, så tar jeg kontakt.',
+]
+  .filter(Boolean)
+  .join(' ')
+
+const delTekst = encodeURIComponent(`${s.navn} – ${undertittel}`)
+const delUrl = encodeURIComponent(side)
+---
+
+<Base
+  aktiv={erBryllup ? 'bryllup' : 'andre'}
+  tittel={s.seo?.tittel || `${s.navn} – ${undertittel || s.kategori.navn}`}
+  beskrivelse={s.seo?.beskrivelse || kortTekst(fortelling || `${undertittel}. Fotografert av Karoline Rage.`)}
+  delingsbilde={forsidebilde}
+  type="article"
+  schema={schema}
+>
+  <nav aria-label="Brødsmuler" class="brodsmuler">
+    <a href="/">Hjem</a> / <a href={`/${s.kategori.slug}`}>{s.kategori.navn}</a> / <span>{s.navn}</span>
+  </nav>
+
+  <Bilde bilde={forsidebilde} alt={forsidebilde?.alt || s.navn} lazy={false} class="story__mobilhelt" />
+
+  <section class="story__tittel">
+    {etikett && <p class="etikett">{etikett}</p>}
+    <h1>{s.navn}</h1>
+    {undertittel && <p class="story__under">{undertittel}</p>}
+    <span class="strek strek--tett"></span>
+    {s.fortelling && <p class="story__fortelling">{s.fortelling}</p>}
+  </section>
+
+  {
+    fakta.length > 0 && (
+      <section aria-label="Fakta" class="fakta">
+        <dl>
+          {fakta.map(([k, v]) => (
+            <div>
+              <dt>{k}</dt>
+              <dd>{v}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+    )
+  }
+
+  <section aria-label="Bilder" class="bilder">
+    {
+      grupper.map((g) =>
+        g.type === 'bred' ? (
+          <figure>
+            <Bilde bilde={g.bilder[0]} forhold={16 / 9} i={g.start} lazy={g.start > 0} />
+            {g.bilder[0].bildetekst && <figcaption>{g.bilder[0].bildetekst}</figcaption>}
+          </figure>
+        ) : g.type === 'midt' ? (
+          <figure class="bilder__midt">
+            <Bilde bilde={g.bilder[0]} forhold={3 / 2} i={g.start} sizes="(max-width: 1040px) 100vw, 960px" />
+            {g.bilder[0].bildetekst && <figcaption>{g.bilder[0].bildetekst}</figcaption>}
+          </figure>
+        ) : (
+          <div class:list={['bilder__rad', `bilder__rad--${g.type}`]}>
+            {g.bilder.map((b, n) => (
+              <figure>
+                <Bilde bilde={b} forhold={0.8} i={g.start + n} sizes={g.type === 'par' ? '(max-width: 720px) 100vw, 50vw' : '(max-width: 720px) 100vw, 33vw'} />
+                {b.bildetekst && <figcaption>{b.bildetekst}</figcaption>}
+              </figure>
+            ))}
+          </div>
+        ),
+      )
+    }
+  </section>
+
+  <section class="story__etter">
+    {
+      s.leverandorer && s.leverandorer.length > 0 && (
+        <div>
+          <h2>Leverandører</h2>
+          <ul>
+            {s.leverandorer.map((l) => (
+              <li>
+                {l.rolle && `${l.rolle}: `}
+                {l.lenke ? <a href={l.lenke} rel="noopener">{l.navn}</a> : l.navn}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
+    <div class="dele">
+      <h2>Del {erBryllup ? 'bryllupet' : 'oppdraget'}</h2>
+      <div class="dele__knapper">
+        <a class="dele__knapp" href={`https://pinterest.com/pin/create/button/?url=${delUrl}&description=${delTekst}${harBilde(forsidebilde ?? null) ? `&media=${encodeURIComponent(bildeUrl(forsidebilde!, 1200))}` : ''}`} target="_blank" rel="noopener">Pinterest</a>
+        <a class="dele__knapp" href={`https://www.facebook.com/sharer/sharer.php?u=${delUrl}`} target="_blank" rel="noopener">Facebook</a>
+        <button type="button" class="dele__knapp" data-kopier={side}>Kopier lenke</button>
+      </div>
+    </div>
+  </section>
+
+  {
+    s.omtale && (
+      <section class="story__omtale">
+        <blockquote>«{s.omtale.sitat.replace(/^«|»$/g, '')}»</blockquote>
+        {s.omtale.navn && <p class="etikett etikett--liten">{s.omtale.navn}</p>}
+      </section>
+    )
+  }
+
+  {
+    (forrige || neste) && (
+      <nav aria-label={`Flere ${s.kategori.navn.toLowerCase()}`} class="flere">
+        {forrige ? (
+          <a href={storyUrl(forrige)} class="flere__lenke flere__lenke--forrige">
+            <Bilde bilde={miniatyr(forrige)} forhold={1} i={1} alt="" bredder={[200]} sizes="96px" class="flere__bilde" />
+            <div>
+              <p class="etikett etikett--liten">← Forrige</p>
+              <p class="flere__navn">{forrige.navn}</p>
+            </div>
+          </a>
+        ) : (
+          <span />
+        )}
+        {neste && (
+          <a href={storyUrl(neste)} class="flere__lenke flere__lenke--neste">
+            <div>
+              <p class="etikett etikett--liten">Neste →</p>
+              <p class="flere__navn">{neste.navn}</p>
+            </div>
+            <Bilde bilde={miniatyr(neste)} forhold={1} i={2} alt="" bredder={[200]} sizes="96px" class="flere__bilde" />
+          </a>
+        )}
+      </nav>
+    )
+  }
+
+  <Kontaktfelt
+    gra
+    overskrift={erBryllup ? i?.kontaktOverskrift : 'Vil du ha slike bilder?'}
+    tekst={kontaktTekst}
+  />
+</Base>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-kopier]').forEach((k) =>
+    k.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(k.dataset.kopier || location.href)
+        k.textContent = 'Kopiert'
+        setTimeout(() => (k.textContent = 'Kopier lenke'), 2000)
+      } catch {
+        prompt('Kopier lenken:', k.dataset.kopier || location.href)
+      }
+    }),
+  )
+</script>
+
+<style>
+  .brodsmuler {
+    padding: 0 var(--kant);
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: var(--mellomgra);
+  }
+  .brodsmuler a {
+    color: var(--mellomgra);
+  }
+  .story__tittel {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 72px 24px 64px;
+    text-align: center;
+  }
+  .story__tittel .etikett {
+    margin-bottom: 20px;
+  }
+  .story__tittel h1 {
+    font-size: clamp(44px, 5.6vw, 80px);
+    line-height: 1.05;
+  }
+  .story__under {
+    margin-top: 16px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(20px, 2vw, 26px);
+  }
+  .story__fortelling {
+    margin-top: 32px;
+    font-size: 18px;
+    line-height: 1.8;
+  }
+  :global(.story__mobilhelt) {
+    display: none !important;
+  }
+
+  .fakta {
+    border-top: 1px solid var(--lysgra);
+    border-bottom: 1px solid var(--lysgra);
+    margin: 0 var(--kant);
+  }
+  .fakta dl {
+    margin: 0;
+    padding: 28px 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+    gap: 20px;
+    text-align: center;
+  }
+  .fakta dt {
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--mellomgra);
+  }
+  .fakta dd {
+    margin: 6px 0 0;
+    font-family: var(--serif);
+    font-size: 20px;
+  }
+
+  .bilder {
+    padding: 64px var(--kant) 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .bilder figure {
+    margin: 0;
+  }
+  .bilder figcaption {
+    margin-top: 12px;
+    font-size: 14px;
+    color: var(--mellomgra);
+    text-align: center;
+  }
+  .bilder__midt {
+    margin: 24px auto !important;
+    max-width: 960px;
+    width: 100%;
+  }
+  .bilder__rad {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .bilder__rad--par > figure {
+    flex: 1 1 300px;
+  }
+  .bilder__rad--tre > figure {
+    flex: 1 1 220px;
+  }
+
+  .story__etter {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 96px 24px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 48px;
+  }
+  .story__etter > div {
+    flex: 1 1 280px;
+  }
+  .story__etter h2 {
+    font-size: 28px;
+    margin-bottom: 20px;
+  }
+  .story__etter ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
+    line-height: 2;
+  }
+  .dele__knapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .dele__knapp {
+    min-height: 44px;
+    padding: 10px 18px;
+    background: transparent;
+    border: 1px solid var(--svart);
+    font-family: var(--sans);
+    font-weight: 300;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--svart);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .story__omtale {
+    max-width: 820px;
+    margin: 96px auto 0;
+    padding: 0 24px;
+    text-align: center;
+  }
+  .story__omtale blockquote {
+    margin: 0 0 20px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(22px, 2.4vw, 30px);
+    line-height: 1.4;
+  }
+
+  .flere {
+    margin-top: 96px;
+    border-top: 1px solid var(--lysgra);
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .flere > * {
+    flex: 1 1 320px;
+  }
+  .flere__lenke {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 32px var(--kant);
+    text-decoration: none;
+    color: var(--svart);
+  }
+  .flere__lenke--forrige {
+    border-right: 1px solid var(--lysgra);
+  }
+  .flere__lenke--neste {
+    justify-content: flex-end;
+    text-align: right;
+  }
+  .flere :global(.flere__bilde) {
+    flex: 0 0 96px;
+  }
+  .flere__navn {
+    margin-top: 6px;
+    font-family: var(--serif);
+    font-size: 22px;
+  }
+
+  @media (max-width: 720px) {
+    .brodsmuler {
+      display: none;
+    }
+    :global(.story__mobilhelt) {
+      display: block !important;
+      aspect-ratio: auto !important;
+      height: calc(100svh - var(--mobil-topp));
+    }
+    .story__tittel {
+      padding: 44px 24px 36px;
+    }
+    .story__tittel .etikett {
+      font-size: 11px;
+      letter-spacing: 2.5px;
+      margin-bottom: 14px;
+    }
+    .story__tittel h1 {
+      font-size: 38px;
+    }
+    .story__under {
+      font-size: 18px;
+      margin-top: 10px;
+    }
+    .story__fortelling {
+      font-size: 15px;
+      line-height: 1.75;
+      text-align: left;
+      margin-top: 22px;
+    }
+    .fakta {
+      display: none;
+    }
+    .bilder {
+      padding: 0;
+      gap: 4px;
+    }
+    .bilder__rad {
+      gap: 4px;
+    }
+    .bilder__rad > figure {
+      flex-basis: 100% !important;
+    }
+    .bilder__midt {
+      margin: 0 !important;
+    }
+    .bilder figcaption {
+      margin: 8px 24px 12px;
+    }
+    .story__etter {
+      padding: 40px 24px 0;
+      gap: 32px;
+    }
+    .story__etter h2 {
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+    .story__etter ul {
+      font-size: 14px;
+      line-height: 1.9;
+    }
+    .flere {
+      margin-top: 40px;
+    }
+    .flere__lenke--forrige {
+      display: none;
+    }
+    .flere__lenke {
+      padding: 24px;
+    }
+  }
+</style>

@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "karoline-rage",
+  "compatibility_date": "2026-11-26",
+  "main": "worker/index.ts",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash",
+    // Bare /api/* kjører kode. Alt annet serveres som statiske filer.
+    "run_worker_first": ["/api/*"]
+  },
+  "observability": {"enabled": true},
+  "vars": {
+    // Fyll inn når Email Routing er satt opp på domenet (se README, steg «Kontaktskjema»)
+    "KONTAKT_FRA": "",
+    "KONTAKT_TIL": ""
+  }
+  // Slå på når Karolines adresse er bekreftet i Email Routing:
+  // ,"send_email": [{"name": "EPOST", "destination_address": "<karolines-epost>"}]
+}

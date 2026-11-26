@@ -1,0 +1,16 @@
+---
+import Base from '../layouts/Base.astro'
+---
+
+<Base tittel="Fant ikke siden">
+  <section class="smal">
+    <p class="etikett">404</p>
+    <h1 style="font-size: clamp(34px, 4.2vw, 56px); margin-top: 20px;">Denne siden finnes ikke</h1>
+    <span class="strek strek--tett"></span>
+    <p class="ingress" style="margin-top: 28px;">Kanskje den har flyttet. Se alle bryllupene, eller gå til forsiden.</p>
+    <p style="margin-top: 40px; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+      <a href="/bryllup" class="knapp">Se bryllup</a>
+      <a href="/" class="knapp">Til forsiden</a>
+    </p>
+  </section>
+</Base>

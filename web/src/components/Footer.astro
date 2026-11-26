@@ -1,0 +1,106 @@
+---
+import type {Innstillinger, Kategori} from '../lib/typer'
+interface Props {
+  innstillinger: Innstillinger
+  kategorier: Kategori[]
+}
+const {innstillinger: i, kategorier} = Astro.props
+const aar = new Date().getFullYear()
+const ig = i?.instagram?.replace(/^@/, '')
+---
+
+<footer class="bunn">
+  <div class="bunn__rad">
+    <span class="bunn__logo">karolinerage</span>
+    <div class="bunn__kolonner">
+      <div>
+        <p class="etikett etikett--liten">Kontakt</p>
+        <p>
+          {i?.epost && <a href={`mailto:${i.epost}`}>{i.epost}</a>}
+          {i?.epost && i?.telefon && <br />}
+          {i?.telefon && <a href={`tel:${i.telefon.replace(/\s/g, '')}`}>{i.telefon}</a>}
+        </p>
+      </div>
+      {
+        ig && (
+          <div>
+            <p class="etikett etikett--liten">Følg</p>
+            <p>
+              <a href={`https://www.instagram.com/${ig}/`} rel="me">
+                Instagram @{ig}
+              </a>
+            </p>
+          </div>
+        )
+      }
+      <div>
+        <p class="etikett etikett--liten">Fotografering</p>
+        <p>
+          {
+            kategorier.map((k, n) => (
+              <>
+                <a href={`/${k.slug}`}>{k.navn}</a>
+                {n < kategorier.length - 1 && (n % 2 === 0 ? ' · ' : <br />)}
+              </>
+            ))
+          }
+        </p>
+      </div>
+    </div>
+  </div>
+  <p class="bunn__liten">© {aar} {i?.navn || 'Fotograf Karoline Rage'}{i?.orgnr && ` · Org.nr. ${i.orgnr}`}</p>
+</footer>
+
+<style>
+  .bunn {
+    border-top: 1px solid var(--lysgra);
+    padding: 64px var(--kant) 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+  .bunn__rad {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 32px 64px;
+  }
+  .bunn__logo {
+    font-family: var(--skrift);
+    font-size: 40px;
+    line-height: 1;
+  }
+  .bunn__kolonner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px 72px;
+    font-size: 15px;
+    line-height: 1.9;
+  }
+  .bunn__kolonner a {
+    text-decoration: none;
+  }
+  .bunn__kolonner .etikett {
+    margin-bottom: 6px;
+  }
+  .bunn__liten {
+    font-size: 12px;
+    color: var(--mellomgra);
+  }
+  @media (max-width: 720px) {
+    .bunn {
+      padding: 40px 24px 32px;
+      text-align: center;
+      gap: 24px;
+    }
+    .bunn__rad,
+    .bunn__kolonner {
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .bunn__logo {
+      font-size: 34px;
+    }
+  }
+</style>

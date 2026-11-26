@@ -1,0 +1,14 @@
+---
+interface Props {
+  overskrift?: string
+  tekst?: string
+  gra?: boolean
+}
+const {overskrift = 'Skal dere gifte dere?', tekst, gra = false} = Astro.props
+---
+
+<section id="kontakt" class:list={['kontaktfelt', {'kontaktfelt--gra': gra}]}>
+  <h2>{overskrift}</h2>
+  {tekst && <p>{tekst}</p>}
+  <a href="/kontakt" class="knapp knapp--full-mobil">Send forespørsel</a>
+</section>
